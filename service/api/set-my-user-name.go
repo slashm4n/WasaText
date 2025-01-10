@@ -8,6 +8,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type SetMyUserNameRequest struct {
+	New_name string `json:"new_name"`
+}
+
 func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// Authenticate user through session token
 	var user User
@@ -21,14 +25,14 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	rt.baseLogger.Info("authenticated user `", user.Name, "`, id ", user.Id, "")
 
 	// Read the request
-	err = json.NewDecoder(r.Body).Decode(&user)
+	var req SetMyUserNameRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "invalid JSON data", http.StatusBadRequest)
 		rt.baseLogger.Error("error decoding JSON:", err.Error())
 		return
 	}
-	new_user_name := user.Name
-	rt.baseLogger.Info("received request to change user name to '" + new_user_name + "'")
+	rt.baseLogger.Info("received request to change user name to '" + req.New_name + "'")
 
 	// Verify the db is ok
 	if err := rt.db.Ping(); err != nil {
@@ -37,14 +41,14 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	}
 
 	// Check the new name pattern
-	if len(new_user_name) < 3 || len(new_user_name) > 16 {
-		rt.baseLogger.Error("user name is too long or too short. User name is: " + new_user_name)
+	if len(req.New_name) < 3 || len(req.New_name) > 16 {
+		rt.baseLogger.Error("user name is too long or too short. User name is: " + req.New_name)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	// Update the name
-	err = rt.db.SetMyUserName(user.Id, new_user_name)
+	err = rt.db.SetMyUserName(user.Id, req.New_name)
 	if err != nil {
 		rt.baseLogger.Error("error trying to update user name: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

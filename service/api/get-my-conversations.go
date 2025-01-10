@@ -10,24 +10,22 @@ import (
 )
 
 func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var err error
-
-	// Verify the db is ok
-	if err = rt.db.Ping(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	// Authenticate user through session token
 	var user User
+	var err error
 	user, err = AuthenticateUser(r)
 	if err != nil {
 		rt.baseLogger.Error(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//rt.baseLogger.Info("used session token ", session_token_str, " for the user `", user.Name, "` (id ", user.Id, ")")
 	rt.baseLogger.Info("authenticated user `", user.Name, "`, id ", user.Id, "")
+
+	// Verify the db is ok
+	if err = rt.db.Ping(); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	// Get the conversations
 	var conversations []database.Conversation

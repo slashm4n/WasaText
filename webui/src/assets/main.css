@@ -1,146 +1,108 @@
 body {
-    display: block;
+	display: block;
     margin: 0px;
+	font-size: 1.2rem;
+	font-family: 'Noto Sans';
 }
 
-.avolio-login-container {
+input {
+	font-size: 1em;
+}
+
+button {
+	border:1px solid  #008;
+	font-size: 1em;
+	padding: 0.3rem;
+	border-radius: 0.4rem;
+}
+
+label {
+	border:1px solid  #008;
+	padding: 0.3rem;
+	border-radius: 0.4rem;
+	font-weight: 500;
+}
+
+.login-container {
 	position: absolute;
 	width: 100%;
-	height: 4em;
+	height: 3em;
 	background-color: #009688;
 }
 
-.avolio-send-message-container {
+.send-message-container {
 	position: absolute;
-	top: 4em;
+	top: 3em;
 	width: 100%;
-	height: 4em;
+	height: 3em;
 	background-color: #a0a0a0;
 }
 
-.avolio-conversations-container {
+.conversations-container {
 	position: absolute;
-	top: 8em;
-	width: 25%;
-	/*height: 50em;*/
-	flex: 1 1 auto; /*non funziona l’intenzione è occupare lo spazio rimanente*/
+	top: 6em;
+	width: 14em;
+	height: calc(100% - 6em);
 	background-color: #f0ffff;
 }
 
-.avolio-conversation-container {
+.conversation-container {
 	position: absolute;
-	top: 8em;
-	left: 25%;
-	width: 75%;
-	height: 90%;
+	top: 6em;
+	left: 14em;
+	width: calc(100% - 14em);
+	height: calc(100% - 6em);
 	background-color: #e5ddd5;
 }
 
-.avolio-chat-list {
-	position: relative;
-	height:calc(100% - 170px);
-	overflow-y: auto;
-}  
-
-.avolio-chat-list .avolio-chat-box {
+.conv-box {
 	position: relative;
 	width: 100%;
-	display:flex;
-  /*   justify-content: center; */
-	align-items:center;
+	height: 4em;
+	display:block;
+  	align-items:center;
 	cursor: pointer;
-	padding: 15px;
+	padding: 0px;
 	border-bottom: 1px solid #eee;  
-}
-  
-.avolio-chat-list .avolio-chat-box .img-box {
-	position:relative;
-	width: 55px;
-	height:45px;
-	overflow:hidden;
-	border-radius: 50%;
+	/*border-radius: 5%;*/
 }
 
-.avolio-chat-list .avolio-chat-box .avolio-chat-details {
-	width: 100%;  
-	margin-left: 10px;
+.conv-box:hover {
+	background-color: #ddd;
 }
 
-.avolio-chat-list .avolio-chat-box .avolio-chat-details .text-head {
-	display:flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom:2px;
+.photo-box {
+	position: absolute;
+	top: 50%;
+	margin-top: -1.5em;
+	left: 1em;
+	width: 3em;
+	height: 3em;
 }
 
-.avolio-chat-list .avolio-chat-box .avolio-chat-details .text-head h4 {
-	font-size: 1.1em;
-	font-weight: 600;
-	color: #000;
-}
-
-.avolio-chat-list .avolio-chat-box .avolio-chat-details .text-head .time {
-	font-size: 0.8em;
-	color: #aaa;
-}
-
-.avolio-chat-list .avolio-chat-box .avolio-chat-details .text-message {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.avolio-chat-list .avolio-chat-box .avolio-chat-details .text-message p {
-	color: #aaa;
-	font-size: 0.9em;
-	overlay: hidden;
-}
-
-img {
-	width: 100%;
-	object-fit: cover;
-}
-
-.avolio-chat-list .avolio-chat-box .avolio-chat-details .text-message b {
-	background: #06e744;
-	color: #fff;
-	min-width: 20px;
-	height: 20px;
-	border-radius: 50%;
-	/*   text-align: center; */
-	font-size: 0.8em;
-	font-weight: 400;
-	display:flex;
-	justify-content:center;
-	align-items:center;
-}
-
-.avolio-chat-list .active {
-	background: #ebebeb;
-}
-
-.avolio-chat-list .avolio-chat-box:hover {
-	background: #f5f5f5;
-}
-
-.avolio-chat-list .avolio-chat-box .avolio-chat-details .text-head .unread {
-	color: #06e744;
+.name-box {
+	font-weight: bold;
+	position: absolute;
+	top: 50%;
+	margin-top: -0.5em;
+	left: 5em;
+	width: 3em;
+	height: 3em;
 }
 
 
 
 
-
-.avolio-message-box {
+.message-box {
 	position:relative;
 	display: flex;
-	width:100%;
-	margin: 5px 0;
+	width: calc(100% - 2em);
+	margin: 0px 0;
   }
 
-.avolio-message-box p {
+.message-box p {
 	position:relative;
-	right: 0;
+	right: -1em;
 	text-align: right;
 	max-width: 65%;
 	padding: 12px;
@@ -149,50 +111,51 @@ img {
 	font-size: 0.9em;
 }
 
-.avolio-message-box.my-message p::before {
+.message-box.my-message p::before {
 	content : '';
 	position: absolute;
-	top: 0;
-	right: -12px;
+	top: 0em;
+	right: -1em;
 	width: 20px;
 	height: 20px;
 	background: linear-gradient(135deg, #dcf8c6 0%, #dcf8c6 50%, transparent 50%, transparent);
 }
 
-.avolio-message-box p span {
+.message-box p span {
 	display: block;
 	margin-top: 5px;
 	font-size: 0.8em;
 	opacity: 0.5;
 }
 
-.avolio-my-message {
+.my-message {
 	justify-content: flex-end;
 }
 
-.avolio-friend-message p {
+.friend-message p {
 	background: #fff;
 }
 
-.avolio-friend-message {
+.friend-message {
 	justify-content: flex-start;
 }
-
-.avolio-chat-container .avolio-my-message i {
+/*
+.chat-container .my-message i {
 	color: yellow;
-}
+}*/
 
-.avolio-message-box.friend-message::before {
+.message-box.friend-message::before {
 	content : '';
 	position: absolute;
-	top: 0;
-	left: -12px;
+	top: 1em;
+	left: 0px;
 	width: 20px;
 	height: 20px;
 	background: linear-gradient(225deg, #fff 0%, #fff 50%, transparent 50%, transparent);  
 }
 
-.avolio-chatbox-input {
+/*
+.chatbox-input {
 	position:relative;
 	width: 100%;
 	height: 60px;
@@ -202,21 +165,21 @@ img {
 	align-items: center;
 }
 
-.avolio-chatbox-input i {
+.chatbox-input i {
 	cursor: pointer;
 	font-size: 1.8em;
 	color: #515855;
 }
 
-.avolio-chatbox-input i:nth-child(1) {
+.chatbox-input i:nth-child(1) {
 	margin: 15px;
 }
   
-.avolio-chatbox-input i:last-child {
+.chatbox-input i:last-child {
 	margin-right: 25px;
 }
 	
-.avolio-chatbox-input input {
+.chatbox-input input {
 	position: relative;
 	width: 90%;
 	margin: 0 20px;
@@ -226,16 +189,16 @@ img {
 	border:none;
 	outline:none;
 }
-
+*/
 
 
 .error-container {
-	z-index: 0;
-	position: relative;
-	margin: auto;
-	width: 40%;
+	z-index: 100;
+	position: absolute;
+	margin-left: calc(50% - 10em);
 	text-align: center;
-	max-width: 20em;
+	min-width: 20em;
+	max-width: 30em;
 	background-color: #fff;
 	border-radius: 2px;
 	-webkit-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);

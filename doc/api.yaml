@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Simplified login API specification
+  title: WasaText API specification
   description: |-
-    This OpenAPI document describes the simplified login API.
+    This OpenAPI document describes the WasaText API.
   version: "1"
 
 tags:
@@ -49,7 +49,6 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/User" }
-
         '201':
           description: Log-in successful for a new user
           content:
@@ -63,7 +62,7 @@ paths:
         - User
       summary: Updates the user name
       description: |-
-        Updates user name
+        Updates the user name
       operationId: setMyUserName
       requestBody:
         description: User details

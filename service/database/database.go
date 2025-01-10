@@ -35,9 +35,10 @@ type Message struct {
 }
 
 type Conversation struct {
-	Conversation_id    int    `json:"conversation_id"`
-	User_or_group_name string `json:"user_or_group_name"`
-	Is_group           int    `json:"is_group"`
+	Conversation_id     int    `json:"conversation_id"`
+	User_or_group_name  string `json:"user_or_group_name"`
+	User_or_group_photo string `json:"user_or_group_photo"`
+	Is_group            int    `json:"is_group"`
 }
 
 // AppDatabase is the high level interface for the DB

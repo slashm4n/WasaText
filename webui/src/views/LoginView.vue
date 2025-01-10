@@ -1,7 +1,8 @@
 <script setup>
-import NewConversationView from './SendMessageView.vue';
-import ConversationsView from './ConversationsView.vue';
 import ErrorMsg from '../components/ErrorMsg.vue';
+import SendMessageView from './SendMessageView.vue';
+import ConversationsView from './ConversationsView.vue';
+import ConversationView from './ConversationView.vue';
 </script>
 
 <script>
@@ -13,7 +14,9 @@ export default {
             username: '',
             new_name: '',
             session_token: 0,
-            user: null
+            user: null,
+            selected_conversation_id : 0,
+            sent_message_to_user_name : ''
 		}
 	},
 	methods: {
@@ -72,7 +75,12 @@ export default {
 		},
 
 		async doLogout() {
-            this.session_token = 0
+            // this.username = '';
+            this.new_name = '';
+            this.session_token = 0;
+            this.user = null;
+            this.selected_conversation_id = 0;
+            this.sent_message_to_user_name = '';
         },
 
 		async doSetMyUserName(new_name) {
@@ -84,13 +92,16 @@ export default {
                         'Authorization' : 'Bearer ' + this.session_token
                     },
                     data: {
-                        "name": new_name
+                        "new_name": new_name
                     }
                 });
 
                 if (res.status != 200) {
                     this.errormsg = "Problem updating the user name";
                 }
+                this.username = this.new_name
+                this.user.name = this.new_name
+                this.new_name = ''
             } catch (e) {
                 this.errormsg = "Error: " + e;
             }
@@ -130,34 +141,39 @@ export default {
             };
         },
 
-        getUserPhoto() {
-            return user.photo;
+        async onSelectedConversationChanged(selected_conversation_id) {
+            this.selected_conversation_id = selected_conversation_id;
+        },
+
+        async onMessageSent(to_user_name) {
+            this.sent_message_to_user_name = to_user_name;
         }
     }
 }
 </script>
 
 <template>
-    <div class="avolio-login-container">
-        <input v-if="session_token == 0" style="position:relative; top:1em; left:1em; width: 15em;" type="text" v-model="username" placeholder="User name">
-        <button v-if="session_token == 0" style="position:relative; top:1em; left:3em; background-color: white" @click="doLogin">Login</button>
+    <div class="login-container">
+        <input id="username" autocomplete="off" v-if="session_token == 0" style="position:relative; top:0.7em; left:1em; width: 8em;" type="text" v-model="username" placeholder="User name">
+        <button v-if="session_token == 0" style="position:relative; top:0.7em; left:2em; background-color: white" @click="doLogin">Login</button>
+    
+        <img v-if="session_token != 0 && user.photo !=''" v-bind:src="user.photo" style="top:0em; left:1em; width: 3em; height: 3em;">
+        <img v-if="session_token != 0 && user.photo ==''" src="../assets/profile.png" style="top:0em; left:1em; width: 3em; height: 3em;">
         
-        <img v-if="session_token != 0 && user.photo !=''" v-bind:src="user.photo" style="top:1em; left:1em; width: 4em; height: 4em;">
-        <img v-if="session_token != 0 && user.photo ==''" src="../assets/profile.png" style="top:1em; left:1em; width: 4em; height: 4em;">
-        <span v-if="session_token != 0" style="position:relative; top:0em; left:1em; color:white; background-color: #008060;">{{ user.name }}</span>
-        <button v-if="session_token != 0" style="position:relative; top:0em; left:3em; background-color: white" @click="doLogout">Logout</button>
-
-        <input v-if="session_token != 0" style="position:relative; top:0em; left:7em; width: 15em;" type="text" v-model="new_name" placeholder="New name">
-        <button v-if="session_token != 0" style="position:relative; top:0em; left:8em; background-color: white" @click="doSetMyUserName(new_name)">Apply</button>
-
-        <span v-if="session_token != 0">
-            <label for="photouploader" class="btn" style="position:relative; top:0em; left:12em; background-color: white">Change profile photo</label>
-            <input type="file" accept="image/*" hidden="true" id="photouploader" @change="doSetMyPhoto">
+        <span v-if="session_token != 0" style="position:relative; top:-1.2em;">
+            <span style="position:relative; left:1em; color:white; font-weight: bold;">{{ user.name }}</span>
+            <button style="position:relative; left:2em; background-color: white" @click="doLogout">Logout</button>
+            <input style="position:relative; left:6em; width: 8em;" type="text" v-model="new_name" placeholder="New name">
+            <button style="position:relative; left:7em; background-color: white" @click="doSetMyUserName(new_name)">Apply</button>
+            <span>
+                <label for="photouploader" class="btn" style="position:relative; left:11em; background-color: white">Change profile photo</label>
+                <input type="file" accept="image/*" hidden="true" id="photouploader" @change="doSetMyPhoto">
+            </span>
         </span>
     </div>
     
     <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
-    <NewConversationView :session_token="session_token" ></NewConversationView>
-    <ConversationsView :session_token="session_token" :user="user" ></ConversationsView>
-    
+    <SendMessageView :session_token="session_token" @messageSent="onMessageSent" ></SendMessageView>
+    <ConversationsView :session_token="session_token" :user="user" :sent_message_to_user_name="sent_message_to_user_name" @selectedConversationChanged="onSelectedConversationChanged"></ConversationsView>
+    <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id"></ConversationView>
 </template>
