@@ -45,6 +45,7 @@ type Conversation struct {
 type AppDatabase interface {
 	GetIdFromName(string) (int, error)
 	GetUserIdAndPhoto(user_name string) (int, string, error)
+	GetAllUsers() ([]User, error)
 	CreateUser(user_id int, user_name string) error
 	SetMyUserName(id int, name string) error
 	SetMyPhoto(id int, photo string) error

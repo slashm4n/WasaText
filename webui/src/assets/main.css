@@ -51,9 +51,19 @@ label {
 	top: 6em;
 	left: 14em;
 	width: calc(100% - 14em);
-	height: calc(100% - 6em);
+	height: calc(100% - 9em);
 	background-color: #e5ddd5;
 }
+
+.message-container {
+	position: absolute;
+	top: calc(100% - 3em);
+	left: 14em;
+	width: calc(100% - 14em);
+	height: 3em;
+	background-color: #a0a0a0;
+}
+
 
 .conv-box {
 	position: relative;
@@ -81,7 +91,7 @@ label {
 }
 
 .name-box {
-	font-weight: bold;
+	font-weight: normal;
 	position: absolute;
 	top: 50%;
 	margin-top: -0.5em;
@@ -98,7 +108,12 @@ label {
 	display: flex;
 	width: calc(100% - 2em);
 	margin: 0px 0;
-  }
+	cursor: pointer;
+}
+
+.message-box:hover {
+    background-color: #ddd;
+}
 
 .message-box p {
 	position:relative;

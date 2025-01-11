@@ -6,7 +6,9 @@ import "fmt"
 func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 	// Query data
 	var sql = `SELECT msg_id, ifnull(forwarded_from_msg_id, 0), conversation_id, from_user_id,
-				strftime ("%H:%M", sent_timestamp), seen, ifnull(reaction, ''), msg FROM MESSAGES
+				strftime ("%H:%M", sent_timestamp), seen, ifnull(reaction, ''), msg
+				FROM MESSAGES
+				ORDER BY sent_timestamp
 				WHERE conversation_id = ` + fmt.Sprint(conversation_id)
 
 	rows, err := db.c.Query(sql)
@@ -26,7 +28,8 @@ func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 		}
 		messages = append(messages, msg)
 	}
-	if err = rows.Err(); err != nil {
+	err = rows.Err()
+	if err != nil {
 		return messages, err
 	}
 

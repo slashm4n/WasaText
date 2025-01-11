@@ -3,6 +3,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 import SendMessageView from './SendMessageView.vue';
 import ConversationsView from './ConversationsView.vue';
 import ConversationView from './ConversationView.vue';
+import MessageView from './MessageView.vue'
 </script>
 
 <script>
@@ -16,7 +17,9 @@ export default {
             session_token: 0,
             user: null,
             selected_conversation_id : 0,
-            sent_message_to_user_name : ''
+            selected_message_id : 0,
+            sent_message_to_user_name : '',
+            need_update_all_users_list : false
 		}
 	},
 	methods: {
@@ -46,9 +49,15 @@ export default {
                 
                 if (res.status == 200) {
                     console.log("Login done successfully. User already existing. Session token ", this.session_token);
+
+                    // also if the user exist, the all users list need to be updated soon after login
+                    this.need_update_all_users_list = true;
                 }
                 else if (res.status == 201) {
                     console.log("Login done successfully. New user created. Session token ", this.session_token);
+
+                    // need refresh the all users list!
+                    this.need_update_all_users_list = true;
                 }
                 else {
                     this.errormsg = "Response code" + res.statusText + " diverso da quello atteso";
@@ -80,6 +89,7 @@ export default {
             this.session_token = 0;
             this.user = null;
             this.selected_conversation_id = 0;
+            this.selected_message_id = 0;
             this.sent_message_to_user_name = '';
         },
 
@@ -98,10 +108,14 @@ export default {
 
                 if (res.status != 200) {
                     this.errormsg = "Problem updating the user name";
+                    return;
                 }
-                this.username = this.new_name
-                this.user.name = this.new_name
-                this.new_name = ''
+                this.username = this.new_name;
+                this.user.name = this.new_name;
+                this.new_name = '';
+
+                // need refresh the all users list!
+                this.need_update_all_users_list = true;
             } catch (e) {
                 this.errormsg = "Error: " + e;
             }
@@ -130,8 +144,8 @@ export default {
                 this.errormsg = "Error: " + e;
             }
         },
-
-		async doSetMyPhoto(e) {
+		
+        async doSetMyPhoto(e) {
             const img = e.target.files[0];
             const reader = new FileReader();
             reader.readAsDataURL(img);
@@ -140,13 +154,23 @@ export default {
                 this.user.photo = evn.target.result;
             };
         },
-
+        
         async onSelectedConversationChanged(selected_conversation_id) {
             this.selected_conversation_id = selected_conversation_id;
+            // must reset the selected message!
+            this.selected_message_id = 0;
         },
-
+        
+        async onSelectedMessageChanged(selected_message_id) {
+            this.selected_message_id = selected_message_id;
+        },
+        
         async onMessageSent(to_user_name) {
             this.sent_message_to_user_name = to_user_name;
+        },
+
+        async onAllUsersListUpdated() {
+            this.need_update_all_users_list = false
         }
     }
 }
@@ -156,7 +180,7 @@ export default {
     <div class="login-container">
         <input id="username" autocomplete="off" v-if="session_token == 0" style="position:relative; top:0.7em; left:1em; width: 8em;" type="text" v-model="username" placeholder="User name">
         <button v-if="session_token == 0" style="position:relative; top:0.7em; left:2em; background-color: white" @click="doLogin">Login</button>
-    
+        
         <img v-if="session_token != 0 && user.photo !=''" v-bind:src="user.photo" style="top:0em; left:1em; width: 3em; height: 3em;">
         <img v-if="session_token != 0 && user.photo ==''" src="../assets/profile.png" style="top:0em; left:1em; width: 3em; height: 3em;">
         
@@ -173,7 +197,8 @@ export default {
     </div>
     
     <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
-    <SendMessageView :session_token="session_token" @messageSent="onMessageSent" ></SendMessageView>
+    <SendMessageView :session_token="session_token" :need_update_all_users_list="need_update_all_users_list" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent" ></SendMessageView>
     <ConversationsView :session_token="session_token" :user="user" :sent_message_to_user_name="sent_message_to_user_name" @selectedConversationChanged="onSelectedConversationChanged"></ConversationsView>
-    <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id"></ConversationView>
+    <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id" @selectedMessageChanged="onSelectedMessageChanged"></ConversationView>
+    <MessageView :session_token="session_token" :selected_message_id="selected_message_id"></MessageView>
 </template>

@@ -33,7 +33,8 @@ func (db *appdbimpl) GetMyConversations(from_user_id int) ([]Conversation, error
 		}
 		conversations = append(conversations, conv)
 	}
-	if err = rows.Err(); err != nil {
+	err = rows.Err()
+	if err != nil {
 		return conversations, err
 	}
 
