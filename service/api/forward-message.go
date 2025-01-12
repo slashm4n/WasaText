@@ -29,7 +29,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	rt.baseLogger.Info("authenticated user `", user.Name, "`, id ", user.Id, "")
-	
+
 	// Retrieve the message_id
 	var req ForwardMessageRequest
 	// TO DO: should verify that the message belongs to a user's conversation
@@ -64,7 +64,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 	}
 
 	// Get the receiver id
-	req.To_user_id, err = rt.db.GetIdFromName(req.To_user)
+	req.To_user_id, _ = rt.db.GetIdFromName(req.To_user)
 	if req.To_user_id == 0 {
 		rt.baseLogger.Error("the receipent of the message `", req.To_user, "` does not exist ")
 		w.WriteHeader(http.StatusBadRequest)

@@ -90,19 +90,18 @@ export default {
 
 <template>
 	<div class="send-message-container" v-if="session_token != 0">
-    	<span style="position:relative; top: 0.7em;">
+    	<div style="position:relative; top: 0.7em; float: left;">
             
-            <label style="position:relative; left:1em; width: 10em; height: 4em; color: white; border: none;">All users:</label>
-            <select name="languages" id="lang" style="position:relative; left:2em; font-size: 1em; min-width: 8em;">
+            <span class="label-flat">All users:</span>
+            <select name="languages" id="lang" style="position:relative; font-size: 1em; min-width: 8em;">
                 <option v-for="u in allusers">{{ u.user_name }}</option>
             </select>
 
-            <span style="position:relative; left: 4em; color: white">Send message to: </span>
-			<input style="position:relative; left: 5em; width: 8em;" v-model="to_user_name" placeholder="User name"></input>
-			<input style="position:relative; left: 6em; width: 8em;" v-model="message" placeholder="Message"></input>
-			<button style="position:relative; left: 7em; background-color: white" @click="doSendMessage">Send</button>
-            <span style="position:relative; left: 8em; color:lightgreen">TO DO: manage group</span>
-		</span>
+            <span class="label-flat">Send message to:</span>
+			<input v-model="to_user_name" placeholder="User name"></input>
+			<input v-model="message" placeholder="Message"></input>
+			<button @click="doSendMessage">Send</button>
+		</div>
 	</div>
     <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
 </template>

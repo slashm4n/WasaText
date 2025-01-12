@@ -6,21 +6,70 @@ body {
 }
 
 input {
+	position: relative;
 	font-size: 1em;
+	margin-left: 1em;
+	width: 8em;
 }
 
 button {
-	border:1px solid  #008;
+	position: relative;
+	margin-left: 1em;
+	color: black;
+	background-color: white;
+	border: 1px solid  #008;
 	font-size: 1em;
 	padding: 0.3rem;
 	border-radius: 0.4rem;
 }
 
 label {
+	position: relative;
+	margin-left: 1em;
 	border:1px solid  #008;
 	padding: 0.3rem;
 	border-radius: 0.4rem;
 	font-weight: 500;
+	color:white
+}
+
+.label-flat {
+	position: relative;
+	margin-left: 1em;
+	padding: 0.3rem;
+	font-weight: 500;
+	color:white
+}
+
+.label-button {
+	position: relative;
+	margin-left: 1em;
+	color: black;
+	background-color: white;
+	border: 1px solid  #008;
+	font-size: 1em;
+	padding: 0.3rem;
+	border-radius: 0.4rem;
+}
+
+
+.photo-box {
+	position: relative;
+	margin-left: 1em;
+	top: 0.5em;
+	width: 3em;
+	height: 3em;
+}
+
+.name-box {
+	font-weight: normal;
+	position: absolute;
+	top: 2.4em;
+	margin-top: -1em;
+	left: 5em;
+	width: 3em;
+	height: 3em;
+	color: #009;
 }
 
 .login-container {
@@ -43,7 +92,8 @@ label {
 	top: 6em;
 	width: 14em;
 	height: calc(100% - 6em);
-	background-color: #f0ffff;
+	background-color: #c0c0c0;
+	overflow-y: auto;
 }
 
 .conversation-container {
@@ -53,6 +103,7 @@ label {
 	width: calc(100% - 14em);
 	height: calc(100% - 9em);
 	background-color: #e5ddd5;
+	overflow-y: auto;
 }
 
 .message-container {
@@ -64,50 +115,33 @@ label {
 	background-color: #a0a0a0;
 }
 
-
 .conv-box {
 	position: relative;
+	margin-top: 0em;
+	padding: 0em;
 	width: 100%;
 	height: 4em;
 	display:block;
   	align-items:center;
 	cursor: pointer;
-	padding: 0px;
-	border-bottom: 1px solid #eee;  
-	/*border-radius: 5%;*/
+	border-bottom: 1px solid #eee;
+	background-color: #d0e0e0;
 }
 
 .conv-box:hover {
 	background-color: #ddd;
 }
 
-.photo-box {
-	position: absolute;
-	top: 50%;
-	margin-top: -1.5em;
-	left: 1em;
-	width: 3em;
-	height: 3em;
+.conv-box:focus {
+	background-color: #eee;
 }
-
-.name-box {
-	font-weight: normal;
-	position: absolute;
-	top: 50%;
-	margin-top: -0.5em;
-	left: 5em;
-	width: 3em;
-	height: 3em;
-}
-
-
 
 
 .message-box {
 	position:relative;
 	display: flex;
 	width: calc(100% - 2em);
-	margin: 0px 0;
+	margin: 0px 1em;
 	cursor: pointer;
 }
 
@@ -115,17 +149,23 @@ label {
     background-color: #ddd;
 }
 
+.message-box:focus {
+    background-color: #eee;
+}
+
+/*entrambi i riquadri*/
 .message-box p {
 	position:relative;
-	right: -1em;
+	right: 0em;
 	text-align: right;
 	max-width: 65%;
 	padding: 12px;
-	background: #dcf8c6;
+	background: #dcf8ce;
 	border-radius: 10px;
 	font-size: 0.9em;
 }
 
+/*triangolo a destra*/
 .message-box.my-message p::before {
 	content : '';
 	position: absolute;
@@ -159,11 +199,12 @@ label {
 	color: yellow;
 }*/
 
+/*triangolo a sinistra*/
 .message-box.friend-message::before {
 	content : '';
 	position: absolute;
 	top: 1em;
-	left: 0px;
+	left: -1em;
 	width: 20px;
 	height: 20px;
 	background: linear-gradient(225deg, #fff 0%, #fff 50%, transparent 50%, transparent);  
@@ -226,13 +267,15 @@ label {
 }
 
 .error-button {
-	display: block;
-	width: 100%;
+	position: relative;
+	left: -1em;
+	width: 50%;
+	min-width: 15em;
 	height: 40px;
 	font-size: 16px;
 	line-height: 1.5;
 	background-color: #42b983;
 	border-radius: 4px;
 	color: white;
-	padding: 10px 0px;
+	padding: 0px 0px;
 }

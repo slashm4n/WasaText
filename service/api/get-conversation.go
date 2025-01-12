@@ -45,7 +45,7 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 	rt.baseLogger.Info("received request to get conversation with id ", conversation_id)
-	belongTo, err := rt.db.IsUserInConversation(user.Id, conversation_id)
+	belongTo, _ := rt.db.IsUserInConversation(user.Id, conversation_id)
 	if !belongTo {
 		rt.baseLogger.Error("the conversation_id do not belong to the user")
 		w.WriteHeader(http.StatusBadRequest)

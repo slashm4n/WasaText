@@ -30,8 +30,8 @@ type Message struct {
 	From_user_id          int    `json:"from_user_id"`
 	Sent_timestamp        string `json:"sent_timestamp"`
 	Seen                  int    `json:"seen"`
-	Reaction              string `json:"reaction"`
 	Msg                   string `json:"msg"`
+	Reaction              string `json:"reaction"`
 }
 
 type Conversation struct {
@@ -43,6 +43,7 @@ type Conversation struct {
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
+	Ping() error
 	GetIdFromName(string) (int, error)
 	GetUserIdAndPhoto(user_name string) (int, string, error)
 	GetAllUsers() ([]User, error)
@@ -52,6 +53,7 @@ type AppDatabase interface {
 	GetNextUserId() (int, error)
 	GetNextConversationId() (int, error)
 	GetNextMessageId() (int, error)
+	GetNextCommentId() (int, error)
 	GetMessage(msg_id int) (Message, error)
 	GetMessageText(msg_id int) (string, error)
 	ChangeName(id int, new_name string) error
@@ -62,7 +64,8 @@ type AppDatabase interface {
 	CreateConversation(conversation_id int, user_id1 int, user_id2 int) error
 	SendMessage(conversation_id int, from_user_id int, message string, forwarded_from_msg_id int) error
 	DeleteMessage(msg_id int) (sql.Result, error)
-	Ping() error
+	CommentMessage(msg_id int, from_user_id int, reaction string) (int, error)
+	UncommentMessage(msg_id int, from_user_id int) error
 }
 
 type appdbimpl struct {
@@ -104,8 +107,22 @@ func New(db *sql.DB) (AppDatabase, error) {
 					msg TEXT NOT NULL,
 					forwarded_from_msg_id INTEGER,
 					seen INTEGER NOT NULL DEFAULT 0,
-					reaction TEXT,
 					PRIMARY KEY(msg_id));`)
+
+		if err != nil {
+			return nil, fmt.Errorf("error creating table: %w", err)
+		}
+	}
+
+	// Check and create table REACTIONS
+	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='REACTIONS';`).Scan(&tableName)
+	if errors.Is(err, sql.ErrNoRows) {
+		_, err = db.Exec(`CREATE TABLE "REACTIONS" (
+					"reaction_id"	INTEGER NOT NULL,
+					"from_user_id"	INTEGER NOT NULL,
+					"msg_id"	INTEGER NOT NULL,
+					"reaction"	TEXT NOT NULL,
+					PRIMARY KEY("reaction_id"));`)
 
 		if err != nil {
 			return nil, fmt.Errorf("error creating table: %w", err)

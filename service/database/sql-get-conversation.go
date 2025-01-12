@@ -5,11 +5,13 @@ import "fmt"
 // Retrieve the conversations
 func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 	// Query data
-	var sql = `SELECT msg_id, ifnull(forwarded_from_msg_id, 0), conversation_id, from_user_id,
-				strftime ("%H:%M", sent_timestamp), seen, ifnull(reaction, ''), msg
+	var sql = `SELECT MESSAGES.msg_id, ifnull(forwarded_from_msg_id, 0), conversation_id, from_user_id,
+				strftime ("%H:%M", sent_timestamp), seen, msg, ifnull(R1.reaction, '')
 				FROM MESSAGES
-				ORDER BY sent_timestamp
-				WHERE conversation_id = ` + fmt.Sprint(conversation_id)
+				LEFT JOIN
+					(SELECT msg_id, group_concat(reaction) as reaction FROM REACTIONS GROUP BY msg_id) AS R1
+					ON R1.msg_id=MESSAGES.msg_id
+				WHERE conversation_id = ` + fmt.Sprint(conversation_id) + ` ORDER BY sent_timestamp`
 
 	rows, err := db.c.Query(sql)
 	if err != nil {
@@ -22,7 +24,7 @@ func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 	for rows.Next() {
 		var msg Message
 		err := rows.Scan(&msg.Msg_id, &msg.Forwarded_from_msg_id, &msg.Conversation_id, &msg.From_user_id,
-			&msg.Sent_timestamp, &msg.Seen, &msg.Reaction, &msg.Msg)
+			&msg.Sent_timestamp, &msg.Seen, &msg.Msg, &msg.Reaction)
 		if err != nil {
 			return messages, err
 		}

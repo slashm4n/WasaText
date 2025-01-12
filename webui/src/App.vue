@@ -3,7 +3,9 @@
 </script>
 
 <template>
-	<LoginView></LoginView>
+	<div style="min-width: 60em">
+		<LoginView></LoginView>
+	</div>
 </template>
 
 <style>

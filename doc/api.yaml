@@ -261,7 +261,7 @@ paths:
         description: The id of a message
         schema:
           type: integer
-          description: message/0123
+          description: message/1234
     post:
       tags:
         - Message
@@ -283,7 +283,7 @@ paths:
                   pattern: ^.*?$
                   minLength: 1
                   maxLength: 1024
-                  example: "Hello world!"
+                  example: ":)"
       responses:
         '201':
           description: Comment added

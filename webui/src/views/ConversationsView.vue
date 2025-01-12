@@ -4,8 +4,8 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-	emits: ['selectedConversationChanged'],
-	props: ['session_token', 'user', 'sent_message_to_user_name'],
+	emits: ['selectedConversationChanged', 'conversationsListUpdated'],
+	props: ['session_token', 'user', 'need_update_conversations_list'],
 	data() {
 		return {
 			errormsg: '',
@@ -28,6 +28,8 @@ export default {
 				});
 
 				this.conversations = response.data;
+				
+				this.$emit('conversationsListUpdated')
 			} catch (e) {
 				this.errormsg = "Error: " + e;
 			}
@@ -40,11 +42,12 @@ export default {
 		}
   	},
   	watch: {
-    	session_token(newToken, oldToken) {
+    	session_token(newValue, oldValue) {
       		this.loadConversationsList();
 		},
-    	sent_message_to_user_name(old_to_user, new_to_user) {
-      		this.loadConversationsList();
+    	need_update_conversations_list(newValue, oldValue) {
+			if (newValue)
+	      		this.loadConversationsList();
 			// TO DO: selezionare la conversazione
 		}
 	}
@@ -53,10 +56,10 @@ export default {
 
 <template>
 	<div class="conversations-container" v-if="session_token != 0">
-		<div class="conv-box" v-for="c in conversations" :key="c.id"  @click="onConversationClick(c)">
+		<div class="conv-box" v-for="(c, index) in conversations" :key="c.id" :tabindex="index" @click="onConversationClick(c)">
 			<img v-if="c.user_or_group_photo != ''" class="photo-box" v-bind:src="c.user_or_group_photo"></img>
 			<img v-if="c.user_or_group_photo == ''" class="photo-box" src="../assets/profile.png"></img>
-			<div class="name-box">{{ c.user_or_group_name }}</div>
+			<span class="name-box">{{ c.user_or_group_name }}</span>
 		</div>
 	</div>
 	<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>

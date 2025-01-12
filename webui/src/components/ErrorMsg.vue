@@ -1,20 +1,10 @@
 <script setup>
-import { watch } from 'vue';
-const props = defineProps({
-	errormsg: {
-		type: String,
-		required: true,
-	},
-});
-
-watch(() => props.errormsg, (newValue) => {
-	console.log(newValue);
-});
 </script>
 
 <script>
 export default {
 	emits: ["errorWindowClosed"],
+	props: ['errormsg'],
 }
 </script>
 
