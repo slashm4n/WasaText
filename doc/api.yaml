@@ -175,13 +175,17 @@ paths:
               description: a message
               type: object
               properties:
-                to_user:
+                to_user_name_or_group_name:
                   type: string
                   description: the name of the receiver user
                   pattern: ^.*?$
                   minLength: 3
-                  maxLength: 10
+                  maxLength: 16
                   example: "Davide"
+                is_group:
+                  type: boolean
+                  description: whether the to_user_name_or_group_name is a user name or a group name
+                  example: false
                 message:
                   type: string
                   description: the message
@@ -243,7 +247,7 @@ paths:
                   description: the name of the receiver user
                   pattern: ^.*?$
                   minLength: 3
-                  maxLength: 10
+                  maxLength: 16
                   example: "Davide"
       responses:
         '201':
@@ -304,40 +308,63 @@ paths:
           description: Comment not found
 
 
-  /groups/{id}:
+  /groups:
     put:
       tags:
         - Group
-      summary: Add user to group
+      summary: Add user to a group
       description: |-
-        Add user to group
+        Add user to an existing or new group
       operationId: addToGroup
-      parameters:
-        - name: id
-          description: id
-          in: path
-          required: true
-          schema:
-            description: User id
-            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
+              description: user name and group
               type: object
-              description: User id
               properties:
-                userId:
-                  type: integer
-                  description: the id of the user
+                user_name_to_add:
+                  type: string
+                  description: the name of the user to add
+                  pattern: ^.*?$
+                  minLength: 3
+                  maxLength: 16
+                  example: "Davide"
+                group_name:
+                  type: string
+                  description: the name of group
+                  pattern: ^.*?$
+                  minLength: 3
+                  maxLength: 16
+                  example: "the best group"
       responses:
         '200':
           description: User added to group
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Group" }
+    get:
+      tags:
+        - Group
+      description: |-
+        Return the list of groups that belongs to the logged user.
+      operationId: getMyGroups
+      summary: Get the list of groups that belongs to the logged user
+      responses:
+        "200":
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                description: The list of groups
+                type: array
+                minItems: 1
+                maxItems: 1000
+                items: { $ref: "#/components/schemas/Group" }
 
+
+  /groups/{group_id}:
     delete:
       tags:
         - Group
@@ -346,8 +373,8 @@ paths:
         Leave a group
       operationId: leaveGroup
       parameters:
-        - name: id
-          description: id
+        - name: group id
+          description: group id
           in: path
           required: true
           schema:
@@ -355,7 +382,7 @@ paths:
             description: Group id
       responses:
         '200':
-          description: Group left successfully
+          description: Group successfully left
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Group" }
@@ -368,8 +395,8 @@ paths:
         Set group name
       operationId: setGroupName
       parameters:
-        - name: id
-          description: id
+        - name: group id
+          description: group id
           in: path
           required: true
           schema:

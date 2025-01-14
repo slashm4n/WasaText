@@ -1,8 +1,8 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
+	"encoding/json"
 	"math/rand"
 	"net/http"
 

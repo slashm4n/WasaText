@@ -64,7 +64,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 	}
 
 	// Get the receiver id
-	req.To_user_id, _ = rt.db.GetIdFromName(req.To_user)
+	req.To_user_id, _ = rt.db.GetUserId(req.To_user)
 	if req.To_user_id == 0 {
 		rt.baseLogger.Error("the receipent of the message `", req.To_user, "` does not exist ")
 		w.WriteHeader(http.StatusBadRequest)

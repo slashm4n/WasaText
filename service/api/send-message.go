@@ -8,9 +8,11 @@ import (
 )
 
 type SendMessageRequest struct {
-	Conversation_id int
-	To_user         string `json:"to_user"`
-	Message         string `json:"message"`
+	Conversation_id             int
+	To_user_name_or_group_name  string `json:"to_user_name_or_group_name"`
+	To_user_id_or_group_id      int    `json:"to_user_id_or_group_id"`
+	Is_group                    bool   `json:"is_group"`
+	Message                     string `json:"message"`
 }
 
 func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -33,7 +35,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 		rt.baseLogger.Error("error decoding JSON:", err.Error())
 		return
 	}
-	rt.baseLogger.Info("received request to send message to the user ", req.To_user)
+	rt.baseLogger.Info("received request to send message to the user ", req.To_user_name_or_group_name)
 
 	// Verify the db is ok
 	if err = rt.db.Ping(); err != nil {
@@ -42,16 +44,15 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	// Get the receiver id
-	var to_user_id int
-	to_user_id, _ = rt.db.GetIdFromName(req.To_user)
-	if to_user_id == 0 {
-		rt.baseLogger.Error("the receipent of the message `", req.To_user, "` does not exist ")
+	req.To_user_id_or_group_id, _ = rt.db.GetUserId(req.To_user_name_or_group_name)
+	if req.To_user_id_or_group_id == 0 {
+		rt.baseLogger.Error("the receipent of the message `", req.To_user_name_or_group_name, "` does not exist ")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	// Retrieve the conversation_id based on the user id's
-	req.Conversation_id, _ = rt.db.GetConversationId(user.Id, to_user_id)
+	req.Conversation_id, _ = rt.db.GetConversationId(user.Id, req.To_user_id_or_group_id)
 
 	// If the conversation does not exist, create it
 	if req.Conversation_id == 0 {
@@ -61,7 +62,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		err = rt.db.CreateConversation(req.Conversation_id, user.Id, to_user_id)
+		err = rt.db.CreateConversation(req.Conversation_id, user.Id, req.To_user_id_or_group_id)
 		if err != nil {
 			rt.baseLogger.Error("error while creating the new conversation ", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)

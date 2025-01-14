@@ -18,9 +18,10 @@ type User struct {
 }
 
 type Group struct {
-	Conversation_id int    `json:"conversation_id"`
+	Group_id        int    `json:"group_id"`
 	Group_name      string `json:"group_name"`
 	Group_photo     string `json:"group_photo"`
+	Conversation_id int    `json:"conversation_id"`
 }
 
 type Message struct {
@@ -44,13 +45,13 @@ type Conversation struct {
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	Ping() error
-	GetIdFromName(string) (int, error)
+	GetUserId(user_name string) (int, error)
 	GetUserIdAndPhoto(user_name string) (int, string, error)
+	GetNextUserId() (int, error)
 	GetAllUsers() ([]User, error)
 	CreateUser(user_id int, user_name string) error
 	SetMyUserName(id int, name string) error
 	SetMyPhoto(id int, photo string) error
-	GetNextUserId() (int, error)
 	GetNextConversationId() (int, error)
 	GetNextMessageId() (int, error)
 	GetNextCommentId() (int, error)
@@ -66,6 +67,10 @@ type AppDatabase interface {
 	DeleteMessage(msg_id int) (sql.Result, error)
 	CommentMessage(msg_id int, from_user_id int, reaction string) (int, error)
 	UncommentMessage(msg_id int, from_user_id int) error
+	CreateGroup(int, string, string, int) error
+    GetMyGroups(int) ([]Group, error)
+	GetGroupDataFromName(group_name string) (int, string, int, error)
+	GetNextGroupId() (int, error)
 }
 
 type appdbimpl struct {
@@ -145,10 +150,11 @@ func New(db *sql.DB) (AppDatabase, error) {
 	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='GROUPS';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
 		_, err = db.Exec(`CREATE TABLE GROUPS (
-					conversation_id INTEGER NOT NULL,
+					group_id INTEGER NOT NULL,
 					group_name INTEGER NOT NULL,
 					group_photo INTEGER,
-					PRIMARY KEY("conversation_id"));`)
+					conversation_id INTEGER NOT NULL,
+					PRIMARY KEY("group_id"));`)
 		if err != nil {
 			return nil, fmt.Errorf("error creating table: %w", err)
 		}

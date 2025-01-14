@@ -1,6 +1,7 @@
 <script setup>
 import ErrorMsg from '../components/ErrorMsg.vue';
 import SendMessageView from './SendMessageView.vue';
+import GroupManagementView from './GroupManagementView.vue';
 import ConversationsView from './ConversationsView.vue';
 import ConversationView from './ConversationView.vue';
 import MessageView from './MessageView.vue'
@@ -182,6 +183,10 @@ export default {
             this.need_update_conversation = true;
         },
 
+        async onUserAddedToGroup() {
+            this.need_update_conversations_list = true
+        },
+
         async onMessageModified(to_user_name) {
             this.need_update_conversation = true;
         },
@@ -207,14 +212,15 @@ export default {
                 <button @click="doLogout">Logout</button>
                 <input type="text" v-model="new_name" placeholder="New name">
                 <button @click="doSetMyUserName(new_name)">Apply</button>
-                <label for="photouploader" class="label-button">Change profile photo</label>
-                <input type="file" accept="image/*" hidden="true" id="photouploader" @change="doSetMyPhoto">
+                <label for="photoUploader" class="label-button">Set photo</label>
+                <input type="file" accept="image/*" hidden="true" id="photoUploader" @change="doSetMyPhoto">
             </span>
         </div>
     </div>
     
     <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
     <SendMessageView :session_token="session_token" :need_update_all_users_list="need_update_all_users_list" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent"></SendMessageView>
+    <GroupManagementView :session_token="session_token" @userAddedToGroup="onUserAddedToGroup"></GroupManagementView>
     <ConversationsView :session_token="session_token" :user="user" :need_update_conversations_list="need_update_conversations_list" @selectedConversationChanged="onSelectedConversationChanged"></ConversationsView @conversationsListUpdated="onConversationsListUpdated">
     <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id" :need_update_conversation="need_update_conversation" @selectedMessageChanged="onSelectedMessageChanged" @conversationUpdated="onConversationUpdated"></ConversationView>
     <MessageView :session_token="session_token" :selected_message_id="selected_message_id" @messageModified="onMessageModified"></MessageView>

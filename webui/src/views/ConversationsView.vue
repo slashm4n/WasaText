@@ -60,6 +60,7 @@ export default {
 			<img v-if="c.user_or_group_photo != ''" class="photo-box" v-bind:src="c.user_or_group_photo"></img>
 			<img v-if="c.user_or_group_photo == ''" class="photo-box" src="../assets/profile.png"></img>
 			<span class="name-box">{{ c.user_or_group_name }}</span>
+			<span class="group-flag-box">{{ c.is_group ? ` (group)` : ``  }}</span>
 		</div>
 	</div>
 	<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
