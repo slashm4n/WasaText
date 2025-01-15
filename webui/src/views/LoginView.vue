@@ -219,7 +219,7 @@ export default {
     </div>
     
     <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
-    <SendMessageView :session_token="session_token" :need_update_all_users_list="need_update_all_users_list" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent"></SendMessageView>
+    <SendMessageView :session_token="session_token" :user="user" :need_update_all_users_list="need_update_all_users_list" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent"></SendMessageView>
     <GroupManagementView :session_token="session_token" @userAddedToGroup="onUserAddedToGroup"></GroupManagementView>
     <ConversationsView :session_token="session_token" :user="user" :need_update_conversations_list="need_update_conversations_list" @selectedConversationChanged="onSelectedConversationChanged"></ConversationsView @conversationsListUpdated="onConversationsListUpdated">
     <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id" :need_update_conversation="need_update_conversation" @selectedMessageChanged="onSelectedMessageChanged" @conversationUpdated="onConversationUpdated"></ConversationView>

@@ -5,7 +5,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 <script>
 export default {
     emits: ['messageSent', 'allUsersListUpdated'],
-	props: ['session_token', 'need_update_all_users_list'],
+	props: ['session_token', 'user', 'need_update_all_users_list'],
 	data: function() {
 		return {
             errormsg: '',
@@ -69,7 +69,12 @@ export default {
                     return;
                 }
 
+                // Remove myself
+                const index = res.data.map(u => u.user_id).indexOf(this.user.id);
+                res.data.splice(index, 1);
                 this.allusers = res.data;
+                
+                
 
                 // Get the list of groups that belongs to the user
                 /*res = await this.$axios({
