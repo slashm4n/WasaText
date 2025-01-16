@@ -14,7 +14,7 @@ export default {
 		}
 	},
 	methods: {
-    	async loadConversationsList() {
+    	async doUpdateConversationsList() {
 			if (this.session_token == 0) {
 				return;
 			}
@@ -30,6 +30,7 @@ export default {
 				this.conversations = response.data;
 				
 				this.$emit('conversationsListUpdated')
+
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -37,6 +38,7 @@ export default {
                     this.errormsg = "Error: " + e;
 			}
 			this.selected_conversation_id = 0;
+			this.errormsg = "";
 		},
 		async onConversationClick(conv) {
 			console.log(`Clicked on ${conv.user_or_group_name}`);
@@ -47,13 +49,13 @@ export default {
   	watch: {
     	session_token(newValue, oldValue) {
 			if (newValue) {
-				this.loadConversationsList();
+				this.doUpdateConversationsList();
 				this.errormsg = '';
 			}
 		},
     	need_update_conversations_list(newValue, oldValue) {
 			if (newValue)
-	      		this.loadConversationsList();
+	      		this.doUpdateConversationsList();
 			// TO DO: selezionare la conversazione
 		}
 	}

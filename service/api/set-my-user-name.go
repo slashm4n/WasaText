@@ -42,15 +42,25 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 
 	// Check the new name pattern
 	if len(req.New_name) < 3 || len(req.New_name) > 16 {
-		rt.baseLogger.Error("user name is too long or too short. User name is: " + req.New_name)
+		rt.baseLogger.Error("new user name '" + req.New_name + "' is too long or too short (min 3, max 16)")
 		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode("new user name '" + req.New_name + "' is too long or too short (min 3, max 16)")
+		return
+	}
+
+	// Check whether the new name already exists!
+	id, _ := rt.db.GetUserId(req.New_name)
+	if id != 0 {
+		rt.baseLogger.Error("the user name '" + req.New_name + "' already exists")
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode("the user name '" + req.New_name + "' already exists")
 		return
 	}
 
 	// Update the name
 	err = rt.db.SetMyUserName(user.Id, req.New_name)
 	if err != nil {
-		rt.baseLogger.Error("error trying to update user name: " + err.Error())
+		rt.baseLogger.Error("error trying to update the user name (" + err.Error() + ")")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

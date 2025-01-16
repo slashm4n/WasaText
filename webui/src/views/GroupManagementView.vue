@@ -48,6 +48,7 @@ export default {
                 this.$emit('userAddedToGroup');
                 this.user_name_to_add = ''
                 this.group_name = '';
+                this.errormsg = "";
             } catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -84,6 +85,7 @@ export default {
                 this.user_name_to_add = ''
                 this.group_name = '';
                 this.new_group_name = '';
+                this.errormsg = "";
             } catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -113,6 +115,8 @@ export default {
                 if (res.status != 200) {
                     this.errormsg = "Problem while updating the profile photo";
                 }
+
+                this.errormsg = "";
             } catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;

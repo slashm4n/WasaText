@@ -14,7 +14,7 @@ export default {
 		}
 	},
 	methods: {
-		async loadConversation() {
+		async doLoadConversation() {
 			try {
 				if (this.selected_conversation_id == 0)
 				{
@@ -35,10 +35,11 @@ export default {
                 }
 
 				this.messages = response.data;
-			
-				// TO DO: scroll to end NON FUNZIONA, PROBABILMENTE DA CAMBIARE POSIZIONE
-				this.$refs.convview.scrollIntoView();
 
+				// TO DO: scroll to end non funziona
+				// UPDATE: non più necessario conversazione in reverse chronological order
+				// this.$refs.convview.scrollIntoView();
+				this.errormsg = "";
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -58,10 +59,10 @@ export default {
 			}
 		},
     	selected_conversation_id(newValue, oldValue) {
-      		this.loadConversation();
+      		this.doLoadConversation();
 		},
     	need_update_conversation(newValue, oldValue) {
-      		this.loadConversation();
+      		this.doLoadConversation();
 			this.$emit('conversationUpdated');
 		}
 	},
@@ -74,7 +75,8 @@ export default {
 			<div :class="{'message-box friend-message':msg.from_user_id!=user.id,'message-box my-message':msg.from_user_id==user.id}"
 				v-for="(msg, index) in messages" :key="msg.id" :tabindex="index"
 				@click="onMessageClick(msg)">
-				<p>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: xx-small">{{ msg.reaction }}</span></p>
+				<p v-if=!msg.is_photo>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: xx-small">{{ msg.reaction }}</span></p>
+				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg></img><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: xx-small">{{ msg.reaction }}</span></p>
 			</div>
 		</div>
 		

@@ -57,6 +57,57 @@ export default {
                     this.errormsg = "Error: " + e;
             }
         },
+
+        // this code cannot be placed inside doSetMyPhoto because
+        // await need to be on the top level of an async method
+        async doSendPhotoAsync(img)
+        {
+            try {
+                const res = await this.$axios({
+                    method: 'post',
+                    url: '/messages',
+                    headers: {
+                        'Authorization' : 'Bearer ' + this.session_token
+                    },
+                    data: {
+                        "to_user_name_or_group_name": this.to_user_name_or_group_name,
+                        "is_group": this.is_group,
+                        "message": img
+                    }
+                });
+
+                if (res.status != 201) {
+                    this.errormsg = "Unexpected response " + res.status;
+                    return;
+                }
+
+                this.$emit('messageSent', this.to_user_name_or_group_name);
+                this.message = '';
+
+                this.errormsg = '';
+            } catch (e) {
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
+            }
+        },
+
+        async doSendPhoto(e) {
+            if (this.to_user_name_or_group_name == '') {
+                this.errormsg = "Receiver user not set";
+                return;
+            }
+            const img = e.target.files[0];
+            if (img == null)
+                return;
+            const reader = new FileReader();
+            reader.readAsDataURL(img);
+            reader.onload = evn =>{
+                this.doSendPhotoAsync(evn.target.result);
+            }
+        },
+
         async doUpdateAllUsersList() {
             try {
                 // Get the list of all users
@@ -137,6 +188,9 @@ export default {
                 </select>
                 <input v-model="message" placeholder="Message"></input>
                 <button @click="doSendMessage">Send</button>
+                <label for="photoSender" class="label-button">Send photo</label>
+                <input type="file" accept="image/*" hidden="true" id="photoSender" @change="doSendPhoto">
+
                 <span style="position:relative;left:1em;color:darkorange">Send to groups not yet implemented</span>
             </div>
         </div>

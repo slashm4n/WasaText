@@ -32,6 +32,7 @@ type Message struct {
 	Sent_timestamp        string `json:"sent_timestamp"`
 	Seen                  int    `json:"seen"`
 	Msg                   string `json:"msg"`
+	Is_photo              bool   `json:"is_photo"`
 	Reaction              string `json:"reaction"`
 }
 

@@ -80,7 +80,6 @@ export default {
                     console.log("missing photo profile");
                 }
                 this.errormsg = "";
-
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -120,6 +119,7 @@ export default {
                 this.username = this.new_name;
                 this.user.name = this.new_name;
                 this.new_name = '';
+                this.errormsg = "";
 
                 // need refresh the all users list!
                 this.need_update_all_users_list = true;
@@ -133,7 +133,7 @@ export default {
 
         // this code cannot be placed inside doSetMyPhoto because
         // await need to be on the top level of an async method
-        async doUploadMyPhoto(img)
+        async doSetMyPhotoAsync(img)
         {
             try {
                 const res = await this.$axios({
@@ -150,6 +150,8 @@ export default {
                 if (res.status != 200) {
                     this.errormsg = "Problem while updating the profile photo";
                 }
+                
+                this.errormsg = "";
             } catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -160,10 +162,12 @@ export default {
 		
         async doSetMyPhoto(e) {
             const img = e.target.files[0];
+            if (img == null)
+                return;
             const reader = new FileReader();
             reader.readAsDataURL(img);
             reader.onload = evn =>{
-                this.doUploadMyPhoto(evn.target.result);
+                this.doSetMyPhotoAsync(evn.target.result);
                 this.user.photo = evn.target.result;
             };
         },
@@ -212,7 +216,7 @@ export default {
 <template>
     <div class="login-container">
         <div style="position: relative; top: 0.7em; float: left;">
-            <input v-if="session_token == 0" v-model="username" type="text" autocomplete="off" placeholder="User name">
+            <input v-if="session_token == 0" v-model="username" type="text" placeholder="User name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <button v-if="session_token == 0" @click="doLogin">Login</button>
             
             <img v-if="session_token != 0 && user.photo !=''" class="photo-box" style="top:-0.7em" v-bind:src="user.photo">
@@ -221,7 +225,7 @@ export default {
             <span v-if="session_token != 0" style="position: relative; top:-1.8em">
                 <span class="label-flat" style="font-weight: bold;">{{ user.name }}</span>
                 <button @click="doLogout">Logout</button>
-                <input type="text" v-model="new_name" placeholder="New name">
+                <input type="text" v-model="new_name" placeholder="New name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 <button @click="doSetMyUserName(new_name)">Apply</button>
                 <label for="photoUploader" class="label-button">Set photo</label>
                 <input type="file" accept="image/*" hidden="true" id="photoUploader" @change="doSetMyPhoto">
