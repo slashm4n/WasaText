@@ -10,7 +10,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,7 +24,9 @@ import (
 func main() {
 
 	if err := run(); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "error: ", err)
+		logger := logrus.New()
+		logger.SetOutput(os.Stdout)
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
 }
@@ -39,7 +40,6 @@ func main() {
 // * waits for any termination event: SIGTERM signal (UNIX), non-recoverable server error, etc.
 // * closes the principal web server
 func run() error {
-
 	// Load Configuration and defaults
 	var err error
 	var cfg WebAPIConfiguration

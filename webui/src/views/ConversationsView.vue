@@ -31,7 +31,10 @@ export default {
 				
 				this.$emit('conversationsListUpdated')
 			} catch (e) {
-				this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
 			}
 			this.selected_conversation_id = 0;
 		},
@@ -43,7 +46,10 @@ export default {
   	},
   	watch: {
     	session_token(newValue, oldValue) {
-      		this.loadConversationsList();
+			if (newValue) {
+				this.loadConversationsList();
+				this.errormsg = '';
+			}
 		},
     	need_update_conversations_list(newValue, oldValue) {
 			if (newValue)
@@ -55,13 +61,15 @@ export default {
 </script>
 
 <template>
-	<div class="conversations-container" v-if="session_token != 0">
-		<div class="conv-box" v-for="(c, index) in conversations" :key="c.id" :tabindex="index" @click="onConversationClick(c)">
-			<img v-if="c.user_or_group_photo != ''" class="photo-box" v-bind:src="c.user_or_group_photo"></img>
-			<img v-if="c.user_or_group_photo == ''" class="photo-box" src="../assets/profile.png"></img>
-			<span class="name-box">{{ c.user_or_group_name }}</span>
-			<span class="group-flag-box">{{ c.is_group ? ` (group)` : ``  }}</span>
+	<div v-if="session_token != 0">
+		<div class="conversations-container" v-if="session_token != 0">
+			<div class="conv-box" v-for="(c, index) in conversations" :key="c.id" :tabindex="index" @click="onConversationClick(c)">
+				<img v-if="c.user_or_group_photo != ''" class="photo-box" v-bind:src="c.user_or_group_photo"></img>
+				<img v-if="c.user_or_group_photo == ''" class="photo-box" src="../assets/profile.png"></img>
+				<span class="name-box">{{ c.user_or_group_name }}</span>
+				<span class="group-flag-box">{{ c.is_group ? ` (group)` : ``  }}</span>
+			</div>
 		</div>
+		<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
 	</div>
-	<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
 </template>

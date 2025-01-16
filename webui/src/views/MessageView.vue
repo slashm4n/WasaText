@@ -28,7 +28,10 @@ export default {
 
 				this.$emit('messageModified', this.to_user_name);
 			} catch (e) {
-				this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
 			}
         },
 		async onApplyReaction() {
@@ -59,7 +62,10 @@ export default {
 
 				this.$emit('messageModified', this.to_user_name);
 			} catch (e) {
-				this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
 			}
 		},
 		async onDeleteReaction() {
@@ -77,11 +83,19 @@ export default {
 
 				this.$emit('messageModified', this.to_user_name);
 			} catch (e) {
-				this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
 			}
 		}
 	},
 	watch: {
+		session_token(newValue, oldValue) {
+			if (newValue) {
+				this.errormsg = '';
+			}
+		},
         selected_message_id(newValue, oldValue) {
         }
 	},
@@ -89,13 +103,15 @@ export default {
 </script>
 
 <template>
-    <div v-if="session_token != 0" class="message-container">
-        <div v-if="selected_message_id != 0" style="position: relative; top: 0.7em">
-            <input ref="comment" type="text" autocomplete="off" placeholder="Reaction">
-			<button @click="onApplyReaction">Apply</button>
-			<button @click="onDeleteReaction">Remove</button>
-			<button @click="onDeleteMessage">Delete message</button>
-        </div>
-    </div>
-    <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
+	<div v-if="session_token != 0">
+		<div class="message-container">
+			<div v-if="selected_message_id != 0" style="position: relative; top: 0.7em">
+				<input ref="comment" type="text" autocomplete="off" placeholder="Reaction">
+				<button @click="onApplyReaction">Apply</button>
+				<button @click="onDeleteReaction">Remove</button>
+				<button @click="onDeleteMessage">Delete message</button>
+			</div>
+		</div>
+		<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
+	</div>
 </template>

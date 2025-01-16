@@ -1,19 +1,19 @@
 package api
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 )
 
 type AddToGroupRequest struct {
-	User_id_to_add      int
-	User_name_to_add    string `json:"user_name_to_add"`
-	Group_id            int
-	Group_name          string `json:"group_name"`
-	Conversation_id     int
+	User_id_to_add   int
+	User_name_to_add string `json:"user_name_to_add"`
+	Group_id         int
+	Group_name       string `json:"group_name"`
+	Conversation_id  int
 }
 
 func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -33,10 +33,10 @@ func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprou
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "invalid JSON data", http.StatusBadRequest)
-		rt.baseLogger.Error("error decoding JSON (", err.Error() + ")")
+		rt.baseLogger.Error("error decoding JSON (", err.Error()+")")
 		return
 	}
-	rt.baseLogger.Info("received request to add user ", req.User_name_to_add + " to group " + req.Group_name)
+	rt.baseLogger.Info("received request to add user ", req.User_name_to_add+" to group "+req.Group_name)
 
 	// Verify the db is ok
 	if err = rt.db.Ping(); err != nil {
@@ -59,7 +59,7 @@ func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprou
 		req.Conversation_id, _ = rt.db.GetNextConversationId()
 		err = rt.db.CreateConversation(req.Conversation_id, user.Id, req.User_id_to_add)
 		if err != nil {
-			rt.baseLogger.Error("error while creating a new conversation for a group (", err.Error() + ")")
+			rt.baseLogger.Error("error while creating a new conversation for a group (", err.Error()+")")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -68,15 +68,15 @@ func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprou
 		req.Group_id, _ = rt.db.GetNextGroupId()
 		err = rt.db.CreateGroup(req.Group_id, req.Group_name, ``, req.Conversation_id)
 		if err != nil {
-			rt.baseLogger.Error("error while creating a new conversation for a group (", err.Error() + ")")
+			rt.baseLogger.Error("error while creating a new conversation for a group (", err.Error()+")")
 			rt.baseLogger.Error("the table groups and conversations could be in an anomalous state")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
-		}		
-		rt.baseLogger.Info("the group `", req.Group_name, "` does not exist so a new one has been created with id " + fmt.Sprint(req.Group_id) + " and conversation id ", fmt.Sprint(req.Conversation_id))
+		}
+		rt.baseLogger.Info("the group `", req.Group_name, "` does not exist so a new one has been created with id "+fmt.Sprint(req.Group_id)+" and conversation id ", fmt.Sprint(req.Conversation_id))
 	}
 	w.WriteHeader(http.StatusCreated)
 
 	// Exit
-	rt.baseLogger.Info("user added to group")	
+	rt.baseLogger.Info("user added to group")
 }

@@ -40,7 +40,10 @@ export default {
 				this.$refs.convview.scrollIntoView();
 
 			} catch (e) {
-				this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
 			}
 		},
 		async onMessageClick(msg) {
@@ -49,6 +52,11 @@ export default {
 		}
 	},
 	watch: {
+    	session_token(newValue, oldValue) {
+			if (newValue) {
+				this.errormsg = '';
+			}
+		},
     	selected_conversation_id(newValue, oldValue) {
       		this.loadConversation();
 		},
@@ -61,13 +69,15 @@ export default {
 </script>
 
 <template>
-	<div ref="convview" v-if="session_token != 0 && user != null && selected_conversation_id != 0" class="conversation-container">
-		<div :class="{'message-box friend-message':msg.from_user_id!=user.id,'message-box my-message':msg.from_user_id==user.id}"
-		      v-for="(msg, index) in messages" :key="msg.id" :tabindex="index"
-		      @click="onMessageClick(msg)">
-			<p>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: xx-small">{{ msg.reaction }}</span></p>
+	<div v-if="session_token != 0">
+		<div ref="convview" v-if="session_token != 0 && user != null && selected_conversation_id != 0" class="conversation-container">
+			<div :class="{'message-box friend-message':msg.from_user_id!=user.id,'message-box my-message':msg.from_user_id==user.id}"
+				v-for="(msg, index) in messages" :key="msg.id" :tabindex="index"
+				@click="onMessageClick(msg)">
+				<p>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: xx-small">{{ msg.reaction }}</span></p>
+			</div>
 		</div>
+		
+		<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
 	</div>
-
-	<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
 </template>

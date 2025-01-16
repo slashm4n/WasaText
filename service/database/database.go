@@ -68,7 +68,7 @@ type AppDatabase interface {
 	CommentMessage(msg_id int, from_user_id int, reaction string) (int, error)
 	UncommentMessage(msg_id int, from_user_id int) error
 	CreateGroup(int, string, string, int) error
-    GetMyGroups(int) ([]Group, error)
+	GetMyGroups(int) ([]Group, error)
 	GetGroupDataFromName(group_name string) (int, string, int, error)
 	GetNextGroupId() (int, error)
 }

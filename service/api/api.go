@@ -125,23 +125,3 @@ func AuthenticateUser(r *http.Request) (User, error) {
 	}
 	return user, nil
 }
-
-/*
-// Structure and variable used through the package
-type User struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-type Message struct {
-	Conversation_id int    `json:"conversation_id"`
-	Msg_id          int    `json:"msg_id"`
-	From_user_id    int    `json:"from_user_id"`
-	To_user_id      int    `json:"to_user_id"`
-	Sent_timestamp  string `json:"sent_timestamp"`
-	Seen            int    `json:"seen"`
-	Reaction        string `json:"reaction"`
-	Msg             string `json:"msg"`
-}*/
-
-//var sessions = make(map[int64]User)

@@ -8,11 +8,11 @@ import (
 )
 
 type SendMessageRequest struct {
-	Conversation_id             int
-	To_user_name_or_group_name  string `json:"to_user_name_or_group_name"`
-	To_user_id_or_group_id      int    `json:"to_user_id_or_group_id"`
-	Is_group                    bool   `json:"is_group"`
-	Message                     string `json:"message"`
+	Conversation_id            int
+	To_user_name_or_group_name string `json:"to_user_name_or_group_name"`
+	To_user_id_or_group_id     int    `json:"to_user_id_or_group_id"`
+	Is_group                   bool   `json:"is_group"`
+	Message                    string `json:"message"`
 }
 
 func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

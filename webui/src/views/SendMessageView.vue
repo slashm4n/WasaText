@@ -48,15 +48,19 @@ export default {
 
                 this.$emit('messageSent', this.to_user_name_or_group_name);
                 this.message = '';
+
+                this.errormsg = '';
             } catch (e) {
-                this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
             }
         },
         async doUpdateAllUsersList() {
             try {
-                var res = null
                 // Get the list of all users
-                res = await this.$axios({
+                var res = await this.$axios({
                     method: 'get',
                     url: '/users',
                     headers: {
@@ -95,8 +99,12 @@ export default {
 
 */
                 this.$emit('allUsersListUpdated');
+                this.errormsg = '';
             } catch (e) {
-                this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
             }
         }
 	},
@@ -105,6 +113,9 @@ export default {
       		if (this.session_token == 0) {
                 this.to_user_name_or_group_name = '';
                 this.message = '';
+            }
+            else {
+                this.errormsg = '';
             }
 		},
         need_update_all_users_list(newValue, oldValue) {
@@ -116,17 +127,19 @@ export default {
 </script>
 
 <template>
-	<div class="send-message-container" v-if="session_token != 0">
-    	<div style="position:relative; top: 0.7em; float: left;">
-            <span class="label-flat">Send message to</span>
-			<select style="position:relative; font-size: 1em; min-width: 8em;" v-model="to_user_name_or_group_name" >
-                <!--option @value=u v-for="u in allusers">{{ u.user_name + "  " + u.group_name }}</option-->
-                <option v-for="u in allusers">{{ u.user_name }}</option>
-            </select>
-            <input v-model="message" placeholder="Message"></input>
-			<button @click="doSendMessage">Send</button>
-            <span style="position:relative;left:1em;color:darkorange">Send to groups not yet implemented</span>
-		</div>
-	</div>
-    <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
+    <div v-if="session_token != 0">
+        <div class="send-message-container">
+            <div style="position:relative; top: 0.7em; float: left;">
+                <span class="label-flat">Send message to</span>
+                <select style="position:relative; font-size: 1em; min-width: 8em;" v-model="to_user_name_or_group_name" >
+                    <!--option @value=u v-for="u in allusers">{{ u.user_name + "  " + u.group_name }}</option-->
+                    <option v-for="u in allusers">{{ u.user_name }}</option>
+                </select>
+                <input v-model="message" placeholder="Message"></input>
+                <button @click="doSendMessage">Send</button>
+                <span style="position:relative;left:1em;color:darkorange">Send to groups not yet implemented</span>
+            </div>
+        </div>
+        <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
+    </div>
 </template>

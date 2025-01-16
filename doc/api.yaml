@@ -254,7 +254,7 @@ paths:
           description: Message sent
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/User" }
+              schema: { $ref: "#/components/schemas/Message" }
 
 
   /messages/{msg_id}/comments:
@@ -373,7 +373,7 @@ paths:
         Leave a group
       operationId: leaveGroup
       parameters:
-        - name: group id
+        - name: group_id
           description: group id
           in: path
           required: true
@@ -395,7 +395,7 @@ paths:
         Set group name
       operationId: setGroupName
       parameters:
-        - name: group id
+        - name: group_id
           description: group id
           in: path
           required: true

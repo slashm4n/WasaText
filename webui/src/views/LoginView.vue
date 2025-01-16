@@ -26,9 +26,9 @@ export default {
 	},
 	methods: {
         async doLogin() {
-			try {
-                if (this.username.length < 3) {
-                    this.errormsg = "user name too short or too long";
+            try {
+                 if (this.username.length < 3 || this.username.length > 16) {
+                    this.errormsg = "user name too short or too long (min 3, max 16)";
                     return;
                 }
 
@@ -79,9 +79,13 @@ export default {
                 if (this.user.photo == '') {
                     console.log("missing photo profile");
                 }
+                this.errormsg = "";
 
 			} catch (e) {
-				this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
 			}
 		},
 
@@ -93,6 +97,7 @@ export default {
             this.selected_conversation_id = 0;
             this.selected_message_id = 0;
             this.need_update_conversation = false;
+            this.errormsg = '';
         },
 
 		async doSetMyUserName(new_name) {
@@ -119,7 +124,10 @@ export default {
                 // need refresh the all users list!
                 this.need_update_all_users_list = true;
             } catch (e) {
-                this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
             }
         },
 
@@ -143,7 +151,10 @@ export default {
                     this.errormsg = "Problem while updating the profile photo";
                 }
             } catch (e) {
-                this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
             }
         },
 		

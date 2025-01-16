@@ -49,7 +49,10 @@ export default {
                 this.user_name_to_add = ''
                 this.group_name = '';
             } catch (e) {
-                this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
             }
         },
         async doSetGroupName() {
@@ -77,12 +80,15 @@ export default {
                     return;
                 }
 
-                //this.$emit('groupNameChanged');
+                // this.$emit('groupNameChanged');
                 this.user_name_to_add = ''
                 this.group_name = '';
                 this.new_group_name = '';
             } catch (e) {
-                this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
             }
         },
 
@@ -108,7 +114,10 @@ export default {
                     this.errormsg = "Problem while updating the profile photo";
                 }
             } catch (e) {
-                this.errormsg = "Error: " + e;
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
             }
         },
 		
@@ -121,22 +130,31 @@ export default {
                 this.group.photo = evn.target.result;
             };
         }
+    },
+    watch: {
+        session_token(newValue, oldValue) {
+            if (newValue) {
+                this.errormsg = '';
+            }
+        }
     }
 }
 </script>
 
 <template>
-    <div class="group-management-container" v-if="session_token != 0">
-        <div style="position:relative; top: 0.7em; float: left;">
-			<span class="label-flat">Group</span>
-			<input v-model="group_name" autocomplete="off" placeholder="Group name"></input>
-			<input v-model="user_name_to_add" autocomplete="off" placeholder="New member"></input>
-			<button @click="doAddToGroup">Apply</button>
-            <input v-model="new_group_name" autocomplete="off" placeholder="New group name"></input>
-			<button @click="doSetGroupName">Apply</button>
-            <label for="photoGroupUploader" class="label-button">Set photo</label>
-            <input type="file" accept="image/*" hidden="true" id="photoGroupUploader" @change="doSetGroupPhoto">
+    <div v-if="session_token != 0">
+        <div class="group-management-container">
+            <div style="position:relative; top: 0.7em; float: left;">
+	    		<span class="label-flat">Group</span>
+		    	<input v-model="group_name" autocomplete="off" placeholder="Group name"></input>
+    			<input v-model="user_name_to_add" autocomplete="off" placeholder="New member"></input>
+	    		<button @click="doAddToGroup">Apply</button>
+                <input v-model="new_group_name" autocomplete="off" placeholder="New group name"></input>
+			    <button @click="doSetGroupName">Apply</button>
+                <label for="photoGroupUploader" class="label-button">Set photo</label>
+                <input type="file" accept="image/*" hidden="true" id="photoGroupUploader" @change="doSetGroupPhoto">
+            </div>
         </div>
+        <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
     </div>
-    <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
 </template>

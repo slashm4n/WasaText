@@ -1,8 +1,8 @@
 package api
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/http"
 
@@ -39,6 +39,8 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	if len(user.Name) < 3 || len(user.Name) > 16 {
 		rt.baseLogger.Error("user name '" + user.Name + "' is too long or too short.")
 		w.WriteHeader(http.StatusBadRequest)
+		// w.Write() // w.Write must go after WriteHeader otherwise StatusOK is written!
+		_ = json.NewEncoder(w).Encode("user name '" + user.Name + "' is too long or too short.")
 		return
 	}
 
