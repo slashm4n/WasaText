@@ -34,6 +34,18 @@ label {
 	color:white
 }
 
+select {
+	position: relative;
+	margin-left: 1em;
+	font-size: 1em;
+}
+
+.emoticon-button {
+	position: relative;
+	margin-left: 0em;
+    font-size: 1em;
+}
+
 .v-bar {
 	position: relative;
 	margin-left: 1em;

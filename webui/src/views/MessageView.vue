@@ -34,40 +34,6 @@ export default {
                     this.errormsg = "Error: " + e;
 			}
         },
-		async onApplyReaction() {
-			if (this.selected_message_id == 0) {
-				return;
-			}
-
-			if (this.$refs.comment == null|| this.$refs.comment.value == '') {
-				return;
-			}
-			try {
-				const response = await this.$axios({
-					method: 'post',
-					url: '/messages/:msg_id/comments',
-					headers: {
-						'Authorization' : 'Bearer ' + this.session_token
-					},
-                    data: {
-                        "msg_id": this.selected_message_id,
-                        "reaction": this.$refs.comment.value
-                    }
-				});
-
-				if (response.status != 201) {
-                    this.errormsg = "Unexpected response " + response.status;
-                    return;
-                }
-
-				this.$emit('messageModified', this.to_user_name);
-			} catch (e) {
-                if (e.response != null && e.response.data != "")
-                    this.errormsg = "Error: " + e.response.data;
-                else
-                    this.errormsg = "Error: " + e;
-			}
-		},
 		async onDeleteReaction() {
             if (this.selected_message_id == 0) {
 				return;
@@ -80,6 +46,40 @@ export default {
 						'Authorization' : 'Bearer ' + this.session_token
 					}
 				});
+
+				this.$emit('messageModified', this.to_user_name);
+			} catch (e) {
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
+			}
+		},
+		async onReactionClick(el) {
+			if (this.selected_message_id == 0) {
+				return;
+			}
+
+			if (el.target == null|| el.target.value == '') {
+				return;
+			}
+			try {
+				const response = await this.$axios({
+					method: 'post',
+					url: '/messages/:msg_id/comments',
+					headers: {
+						'Authorization' : 'Bearer ' + this.session_token
+					},
+                    data: {
+                        "msg_id": this.selected_message_id,
+                        "reaction": el.target.value
+                    }
+				});
+
+				if (response.status != 201) {
+                    this.errormsg = "Unexpected response " + response.status;
+                    return;
+                }
 
 				this.$emit('messageModified', this.to_user_name);
 			} catch (e) {
@@ -106,8 +106,10 @@ export default {
 	<div v-if="session_token != 0">
 		<div class="message-container">
 			<div v-if="selected_message_id != 0" style="position: relative; top: 0.7em">
-				<input ref="comment" type="text" autocomplete="off" placeholder="Reaction">
-				<button @click="onApplyReaction">Apply</button>
+				<button class="emoticon-button" @click="onReactionClick" value="&#x1F600;">&#x1F600;</button>
+				<button class="emoticon-button" @click="onReactionClick" value="&#x1F602;">&#x1F602;</button>
+				<button class="emoticon-button" @click="onReactionClick" value="&#x1F621;">&#x1F621;</button>
+				<button class="emoticon-button" @click="onReactionClick" value="&#x1F44D;">&#x1F44D;</button>
 				<button @click="onDeleteReaction">Remove</button>
 				<button @click="onDeleteMessage">Delete message</button>
 			</div>

@@ -101,14 +101,9 @@ export default {
         async doSendPhoto(e) {
             if (this.to_user_name_or_group_name == '') {
                 this.errormsg = "Receiver user not set";
-                // DA SISTEMARE NON FUNZIONA
-                // this.$refs.photoSender.value = ''
                 return;
             }
             const img = e.target.files[0];
-            // necessary to reset, otherwise we can’t select the same image two times
-            // DA SISTEMARE NON FUNZIONA
-            // this.$refs.photoSender.value = ''
 
             if (img == null)
                 return;
@@ -176,6 +171,9 @@ export default {
                 else
                     this.errormsg = "Error: " + e;
             }
+        },
+        async onImageUploaderClick() {
+            this.$refs.photoSender.value = ''
         }
 	},
     watch: {
@@ -201,15 +199,15 @@ export default {
         <div class="send-message-container">
             <div style="position:relative; top: 0.7em; float: left;">
                 <span class="label-flat">Send message to</span>
-                <select style="position:relative; font-size: 1em; min-width: 8em;" v-model="to_user_name_or_group_name" >
-                    <!--option @value=u v-for="u in allusers">{{ u.user_name + "  " + u.group_name }}</option-->
-                    <!--option v-for="u in allusers">{{ u.user_name }}</option-->
+                <select style="z-index: 99; position:relative; height: 1.4em; width: 9.5em;" v-model="to_user_name_or_group_name" >
                     <option v-for="u in allusers">{{ u.is_group ? u.group_name + " (group)" : u.user_name }}</option>
                 </select>
+                <input style="z-index: 100; position:absolute; top:0.2em; left: 9.5em; width: 8em;" v-model="to_user_name_or_group_name">
+                </input>
                 <input v-model="message" placeholder="Message"></input>
                 <button @click="doSendMessage">Send</button>
                 <label for="photoSender" class="label-button">Send photo</label>
-                <input type="file" accept="image/*" hidden="true" id="photoSender" @change="doSendPhoto">
+                <input type="file" accept="image/*" hidden="true" id="photoSender" ref="photoSender" @click="onImageUploaderClick" @change="doSendPhoto">
             </div>
         </div>
         <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>

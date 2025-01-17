@@ -75,8 +75,8 @@ export default {
 			<div :class="{'message-box friend-message':msg.from_user_id!=user.id,'message-box my-message':msg.from_user_id==user.id}"
 				v-for="(msg, index) in messages" :key="msg.id" :tabindex="index"
 				@click="onMessageClick(msg)">
-				<p v-if=!msg.is_photo>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: xx-small">{{ msg.reaction }}</span></p>
-				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg></img><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: xx-small">{{ msg.reaction }}</span></p>
+				<p v-if=!msg.is_photo>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
+				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg></img><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
 			</div>
 		</div>
 		
