@@ -5,12 +5,18 @@ import "fmt"
 // Retrieve the conversations
 func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 	// Query data
-	var sql = `SELECT MESSAGES.msg_id, ifnull(forwarded_from_msg_id, 0), conversation_id, from_user_id,
-				strftime ("%H:%M", sent_timestamp), seen, msg, iif(substr(msg, 1, 11)='data:image/', true, false) is_photo, ifnull(R1.reaction, '')
+	var sql = `SELECT MESSAGES.msg_id, ifnull(forwarded_from_msg_id, 0), conversation_id, MESSAGES.from_user_id,
+				strftime ("%H:%M", sent_timestamp), seen, msg, iif(substr(msg, 1, 11)='data:image/', true, false) is_photo,
+				ifnull(R1.reaction_user, "") reaction
 				FROM MESSAGES
 				LEFT JOIN
-					(SELECT msg_id, group_concat(reaction) as reaction FROM REACTIONS GROUP BY msg_id) AS R1
+					(
+						SELECT msg_id, from_user_id, group_concat(reaction || USERS.user_name) as reaction_user
+						FROM REACTIONS
+						INNER JOIN USERS ON USERS.user_id = REACTIONS.from_user_id
+					) AS R1
 					ON R1.msg_id=MESSAGES.msg_id
+				LEFT JOIN USERS ON USERS.user_id = R1.from_user_id
 				WHERE conversation_id = ` + fmt.Sprint(conversation_id) + ` ORDER BY sent_timestamp DESC`
 
 	rows, err := db.c.Query(sql)

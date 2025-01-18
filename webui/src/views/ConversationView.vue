@@ -87,7 +87,6 @@ export default {
 				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
 			</div>
 		</div>
-		
 		<ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
 	</div>
 </template>
