@@ -116,8 +116,8 @@ export default {
         });
 
         try {
-            this.group = JSON.parse(localStorage.getItem('selected_group'))
-            this.new_group_name = JSON.parse(localStorage.getItem('new_group_name'))
+            if (localStorage.getItem('selected_group') != null) this.group = JSON.parse(localStorage.getItem('selected_group'));
+            if (localStorage.getItem('new_group_name') != null) this.new_group_name = JSON.parse(localStorage.getItem('new_group_name'));
         } catch {
         }
     }

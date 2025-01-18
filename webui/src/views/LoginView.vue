@@ -327,6 +327,8 @@ export default {
         }
     },
     beforeMount: function () {
+        // localStorage.clear(); uncomment only for testing a new installation!
+
         window.addEventListener('beforeunload', (e) => {
             localStorage.setItem('session_token',  JSON.stringify(this.session_token));
             localStorage.setItem('username', JSON.stringify(this.username));
@@ -342,16 +344,16 @@ export default {
         });
 
         try {
-            this.session_token = JSON.parse(localStorage.getItem('session_token'))
-            this.username = JSON.parse(localStorage.getItem('username'))
-            this.new_name = JSON.parse(localStorage.getItem('new_name'))
-            this.user = JSON.parse(localStorage.getItem('user'))
-            this.all_users = JSON.parse(localStorage.getItem('all_users'))
-            this.my_groups = JSON.parse(localStorage.getItem('my_groups'))
-            this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'))
-            this.need_update_conversations_list = JSON.parse(localStorage.getItem('need_update_conversations_list'))
-            this.need_update_conversation = JSON.parse(localStorage.getItem('need_update_conversation'))
-            this.need_update_all_users_list = JSON.parse(localStorage.getItem('need_update_all_users_list'))
+            if (localStorage.getItem('session_token') != null) this.session_token = JSON.parse(localStorage.getItem('session_token'));
+            if (localStorage.getItem('username') != null) this.username = JSON.parse(localStorage.getItem('username'));
+            if (localStorage.getItem('new_name') != null) this.new_name = JSON.parse(localStorage.getItem('new_name'));
+            if (localStorage.getItem('user') != null) this.user = JSON.parse(localStorage.getItem('user'));
+            if (localStorage.getItem('all_users') != null) this.all_users = JSON.parse(localStorage.getItem('all_users'));
+            if (localStorage.getItem('my_groups') != null) this.my_groups = JSON.parse(localStorage.getItem('my_groups'));
+            if (localStorage.getItem('selected_conversation_id') != null) this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'));
+            if (localStorage.getItem('need_update_conversations_list') != null) this.need_update_conversations_list = JSON.parse(localStorage.getItem('need_update_conversations_list'));
+            if (localStorage.getItem('need_update_conversation') != null) this.need_update_conversation = JSON.parse(localStorage.getItem('need_update_conversation'));
+            if (localStorage.getItem('need_update_all_users_list') != null) this.need_update_all_users_list = JSON.parse(localStorage.getItem('need_update_all_users_list'));
         } catch {
             this.session_token = 0
         }

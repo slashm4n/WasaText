@@ -11,6 +11,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// Get conversation AND mark messages as seen by the caller user
 func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var err error
 
@@ -69,5 +70,11 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 		rt.baseLogger.Error("error during the encoding of the json (", err.Error(), ")")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	// Mark the all the messages of the conversatin as seen by the user!
+	err = rt.db.MarkMessagesSeen(user.Id, conversation_id)
+	if err != nil {
+		rt.baseLogger.Error("issue while marking messages seen (", err.Error(), ")")
 	}
 }

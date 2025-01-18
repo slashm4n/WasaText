@@ -69,8 +69,8 @@ export default {
         });
 
         try {
-            this.messages = JSON.parse(localStorage.getItem('messages'))
-            this.selected_message_id = JSON.parse(localStorage.getItem('selected_message_id'))
+            if (localStorage.getItem('messages') != null) this.messages = JSON.parse(localStorage.getItem('messages'));
+            if (localStorage.getItem('selected_message_id') != null) this.selected_message_id = JSON.parse(localStorage.getItem('selected_message_id'));
         } catch {
         }
     }
@@ -81,10 +81,9 @@ export default {
 	<div v-if="session_token != 0">
 		<div ref="convview" v-if="session_token != 0 && user != null && selected_conversation_id != 0" class="conversation-container">
 			<div :class="{'message-box friend-message':msg.from_user_id!=user.id,'message-box my-message':msg.from_user_id==user.id}"
-				v-for="(msg, index) in messages" :key="msg.id" :tabindex="index"
-				@click="onMessageClick(msg)">
-				<p v-if=!msg.is_photo>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
-				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
+				v-for="(msg, index) in messages" :key="msg.id" :tabindex="index" @click="onMessageClick(msg)">
+				<p v-if=!msg.is_photo>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span v-if="msg.from_user_id==user.id" style="font-size: smaller;">{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
+				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span v-if="msg.from_user_id==user.id" style="font-size: smaller;">{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
 			</div>
 		</div>
 		<ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>

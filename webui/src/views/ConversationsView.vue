@@ -69,8 +69,8 @@ export default {
         });
 
         try {
-            this.conversations = JSON.parse(localStorage.getItem('conversations'))
-            this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'))
+            if (localStorage.getItem('conversations') != null) this.conversations = JSON.parse(localStorage.getItem('conversations'));
+            if (localStorage.getItem('selected_conversation_id') != null) this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'));
         } catch {
         }
     }

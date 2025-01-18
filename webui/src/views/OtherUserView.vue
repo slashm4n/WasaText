@@ -188,8 +188,8 @@ export default {
         });
 
         try {
-            this.to_user_name_or_group_name = JSON.parse(localStorage.getItem('to_user_name_or_group_name'))
-            this.message = JSON.parse(localStorage.getItem('message'))
+            if (localStorage.getItem('to_user_name_or_group_name') != null) this.to_user_name_or_group_name = JSON.parse(localStorage.getItem('to_user_name_or_group_name'))
+            if (localStorage.getItem('message') != null) this.message = JSON.parse(localStorage.getItem('message'))
         } catch {
         }
     }

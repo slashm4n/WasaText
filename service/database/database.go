@@ -30,10 +30,10 @@ type Message struct {
 	Conversation_id       int    `json:"conversation_id"`
 	From_user_id          int    `json:"from_user_id"`
 	Sent_timestamp        string `json:"sent_timestamp"`
-	Seen                  int    `json:"seen"`
 	Msg                   string `json:"msg"`
 	Is_photo              bool   `json:"is_photo"`
 	Reaction              string `json:"reaction"`
+	Seen                  int    `json:"seen"`
 }
 
 type Conversation struct {
@@ -61,6 +61,7 @@ type AppDatabase interface {
 	ChangeName(id int, new_name string) error
 	GetMyConversations(from_user_id int) ([]Conversation, error)
 	GetConversation(conversation_id int) ([]Message, error)
+	MarkMessagesSeen(seen_by_user_id int, conversation_id int) error
 	IsUserInConversation(user_id int, conversation_id int) (bool, error)
 	GetConversationId(user_id1 int, user_id2 int) (int, error)
 	CreateConversation(conversation_id int, user_id1 int, user_id2 int) error
@@ -114,8 +115,20 @@ func New(db *sql.DB) (AppDatabase, error) {
 					sent_timestamp TEXT NOT NULL DEFAULT '1970-01-01 00:00:00',
 					msg TEXT NOT NULL,
 					forwarded_from_msg_id INTEGER,
-					seen INTEGER NOT NULL DEFAULT 0,
 					PRIMARY KEY(msg_id));`)
+
+		if err != nil {
+			return nil, fmt.Errorf("error creating table: %w", err)
+		}
+	}
+
+	// Check and create table MESSAGES_SEEN
+	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='MESSAGES_SEEN';`).Scan(&tableName)
+	if errors.Is(err, sql.ErrNoRows) {
+		_, err = db.Exec(`CREATE TABLE "MESSAGES_SEEN" (
+					msg_id INTEGER NOT NULL,
+					seen_by_user_id INTEGER NOT NULL,
+					PRIMARY KEY(msg_id, seen_by_user_id));`)
 
 		if err != nil {
 			return nil, fmt.Errorf("error creating table: %w", err)
