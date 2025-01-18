@@ -1,6 +1,6 @@
 <script setup>
 import ErrorMsg from '../components/ErrorMsg.vue';
-import SendMessageView from './SendMessageView.vue';
+import OtherUserView from './OtherUserView.vue';
 import GroupManagementView from './GroupManagementView.vue';
 import ConversationsView from './ConversationsView.vue';
 import ConversationView from './ConversationView.vue';
@@ -13,15 +13,18 @@ export default {
     data: function() {
 		return {
             errormsg: '',
+            session_token: 0,
             username: '',
             new_name: '',
-            session_token: 0,
             user: null,
+            all_users: null,
+            my_groups: null,
             selected_conversation_id : 0,
             selected_message_id : 0,
             need_update_conversations_list : false,
             need_update_conversation : false,
-            need_update_all_users_list : false
+            need_update_all_users_list : false,
+            need_update_groups_list : false
 		}
 	},
 	methods: {
@@ -44,11 +47,11 @@ export default {
                 
                 if (authHeader && authHeader.startsWith('Bearer ')) {
                     this.session_token = authHeader.substring(7);
-                    console.log("session token ", this.session_token);
+                    // console.log("session token ", this.session_token);
                 } else {
                     this.errormsg = "no valid authorization header found.";
                 }
-                
+
                 if (res.status == 200) {
                     console.log("Login done successfully. User already existing. Session token ", this.session_token);
 
@@ -77,8 +80,14 @@ export default {
 
                 // Check the photo profile and if missing assign the default one
                 if (this.user.photo == '') {
-                    console.log("missing photo profile");
+                    // console.log("missing photo profile");
                 }
+
+                // Soon after the login Update the users list and my groups list
+                this.doUpdateAllUsersList();
+                this.doUpdateMyGroupsList();
+
+                // Exit
                 this.errormsg = "";
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
@@ -160,6 +169,109 @@ export default {
             }
         },
 		
+        async doUpdateAllUsersList() {
+            try {
+                // Get the list of all users
+                var res = await this.$axios({
+                    method: 'get',
+                    url: '/users',
+                    headers: {
+                        'Authorization' : 'Bearer ' + this.session_token
+                    }
+                });
+
+                if (res.status != 200) {
+                    this.errormsg = "Unexpected response " + res.status;
+                    return;
+                }
+
+                // Add the column 'is_group' with value false
+                res.data.forEach(function(e){
+                    e["is_group"] = false;
+                });
+
+                // Remove myself!
+                const index = res.data.map(u => u.user_id).indexOf(this.user.id);
+                res.data.splice(index, 1);
+                this.all_users = res.data;
+                
+                
+                // Get the list of groups that belongs to the user
+                res = await this.$axios({
+                    method: 'get',
+                    url: '/groups',
+                    headers: {
+                        'Authorization' : 'Bearer ' + this.session_token
+                    }
+                });
+
+                if (res.status != 200) {
+                    this.errormsg = "Unexpected response " + res.status;
+                    return;
+                }
+
+                // Add the column 'is_group' with value true
+                if (res.data != null) {
+                    res.data.forEach(function(e) {
+                        e["is_group"] = true;
+                    });
+                    this.all_users = this.all_users.concat(res.data);
+                }
+                
+                // Is still necessary??
+                // this.$emit('allUsersListUpdated');
+
+                // Exit
+                this.errormsg = '';
+            } catch (e) {
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
+            }
+        },
+        
+        async doUpdateMyGroupsList() {
+            try {
+                // Get the list of groups that belongs to the user
+                const res = await this.$axios({
+                    method: 'get',
+                    url: '/groups',
+                    headers: {
+                        'Authorization' : 'Bearer ' + this.session_token
+                    }
+                });
+
+                if (res.status != 200) {
+                    this.errormsg = "Unexpected response " + res.status;
+                    return;
+                }
+
+                this.my_groups = res.data;
+                
+                // Is still necessary??
+                // this.$emit('myGroupsListUpdated');
+
+                // Exit
+                this.errormsg = '';
+            } catch (e) {
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
+            }
+        },
+
+        async onNeedUpdateAllUsersList() {
+            this.doUpdateAllUsersList();
+            this.need_update_conversations_list = true;
+        },
+
+        async onNeedUpdateMyGroupsList() {
+            this.doUpdateMyGroupsList();
+            this.need_update_conversations_list = true;
+        },
+
         async doSetMyPhoto(e) {
             const img = e.target.files[0];
             if (img == null)
@@ -193,13 +305,9 @@ export default {
         async onMessageSent(to_user_name) {
             if (this.selected_conversation_id == 0) {
                 // TO DO: should force the refreash of the list of conversations and the selection of the conversation
-                this.need_update_conversations_list = true
+                this.need_update_conversations_list = true;
             }
             this.need_update_conversation = true;
-        },
-
-        async onUserAddedToGroup() {
-            this.need_update_conversations_list = true
         },
 
         async onMessageModified(to_user_name) {
@@ -207,7 +315,45 @@ export default {
         },
 
         async onAllUsersListUpdated() {
-            this.need_update_all_users_list = false
+            this.need_update_all_users_list = false;
+        },
+
+        async onPhotoUploaderClick() {
+            this.$refs.photoUploader.value = '';
+        },
+
+        async onMyConversationsUpdated() {
+            this.need_update_conversations_list = true;
+        }
+    },
+    beforeMount: function () {
+        window.addEventListener('beforeunload', (e) => {
+            localStorage.setItem('session_token',  JSON.stringify(this.session_token));
+            localStorage.setItem('username', JSON.stringify(this.username));
+            localStorage.setItem('new_name', JSON.stringify(this.new_name));
+            localStorage.setItem('user', JSON.stringify(this.user));
+            localStorage.setItem('all_users', JSON.stringify(this.all_users));
+            localStorage.setItem('my_groups', JSON.stringify(this.my_groups));
+            localStorage.setItem('selected_conversation_id', JSON.stringify(this.selected_conversation_id));
+            localStorage.setItem('selected_message_id', JSON.stringify(this.selected_message_id));
+            localStorage.setItem('need_update_conversations_list', JSON.stringify(this.need_update_conversations_list));
+            localStorage.setItem('need_update_conversation', JSON.stringify(this.need_update_conversation));
+            localStorage.setItem('need_update_all_users_list', JSON.stringify(this.need_update_all_users_list));
+        });
+
+        try {
+            this.session_token = JSON.parse(localStorage.getItem('session_token'))
+            this.username = JSON.parse(localStorage.getItem('username'))
+            this.new_name = JSON.parse(localStorage.getItem('new_name'))
+            this.user = JSON.parse(localStorage.getItem('user'))
+            this.all_users = JSON.parse(localStorage.getItem('all_users'))
+            this.my_groups = JSON.parse(localStorage.getItem('my_groups'))
+            this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'))
+            this.need_update_conversations_list = JSON.parse(localStorage.getItem('need_update_conversations_list'))
+            this.need_update_conversation = JSON.parse(localStorage.getItem('need_update_conversation'))
+            this.need_update_all_users_list = JSON.parse(localStorage.getItem('need_update_all_users_list'))
+        } catch {
+            this.session_token = 0
         }
     }
 }
@@ -216,27 +362,27 @@ export default {
 <template>
     <div class="login-container">
         <div style="position: relative; top: 0.7em; float: left;">
-            <input v-if="session_token == 0" v-model="username" type="text" placeholder="User name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input v-if="session_token == 0" id="username" v-model="username" type="text" placeholder="User name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <button v-if="session_token == 0" @click="doLogin">Login</button>
             
-            <img v-if="session_token != 0 && user.photo !=''" class="photo-box" style="top:-0.7em" v-bind:src="user.photo">
-            <img v-if="session_token != 0 && user.photo ==''" class="photo-box" style="top:-0.7em" src="../assets/profile.png">
+            <img v-if="session_token != 0 && user != null && user.photo !=''" class="photo-box" style="top:-0.7em" v-bind:src="user.photo">
+            <img v-if="session_token != 0 && user != null && user.photo ==''" class="photo-box" style="top:-0.7em" src="../assets/profile.png">
             
-            <span v-if="session_token != 0" style="position: relative; top:-1.8em">
+            <span v-if="session_token != 0 && user != null" style="position: relative; top:-1.8em">
                 <span class="label-flat" style="font-weight: bold;">{{ user.name }}</span>
                 <button @click="doLogout">Logout</button>
                 <input type="text" v-model="new_name" placeholder="New name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 <button @click="doSetMyUserName(new_name)">Apply</button>
                 <label for="photoUploader" class="label-button">Set photo</label>
-                <input type="file" accept="image/*" hidden="true" id="photoUploader" @change="doSetMyPhoto">
+                <input type="file" accept="image/*" hidden="true" id="photoUploader" ref="photoUploader" @click="onPhotoUploaderClick" @change="doSetMyPhoto">
             </span>
         </div>
     </div>
     
-    <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
-    <SendMessageView :session_token="session_token" :user="user" :need_update_all_users_list="need_update_all_users_list" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent"></SendMessageView>
-    <GroupManagementView :session_token="session_token" @userAddedToGroup="onUserAddedToGroup"></GroupManagementView>
-    <ConversationsView :session_token="session_token" :user="user" :need_update_conversations_list="need_update_conversations_list" @selectedConversationChanged="onSelectedConversationChanged"></ConversationsView @conversationsListUpdated="onConversationsListUpdated">
+    <ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
+    <OtherUserView :session_token="session_token" :user="user" :all_users="all_users" @myConversationsUpdated="onMyConversationsUpdated" @usersUpdated="onNeedUpdateAllUsersList" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent"></OtherUserView>
+    <GroupManagementView :session_token="session_token" :my_groups="my_groups" @groupsUpdated="onNeedUpdateMyGroupsList"></GroupManagementView>
+    <ConversationsView :session_token="session_token" :user="user" :need_update_conversations_list="need_update_conversations_list" @selectedConversationChanged="onSelectedConversationChanged" @conversationsListUpdated="onConversationsListUpdated"></ConversationsView>
     <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id" :need_update_conversation="need_update_conversation" @selectedMessageChanged="onSelectedMessageChanged" @conversationUpdated="onConversationUpdated"></ConversationView>
-    <MessageView :session_token="session_token" :selected_message_id="selected_message_id" @messageModified="onMessageModified"></MessageView>
+    <MessageView :session_token="session_token" :user="user" :all_users="all_users" :selected_message_id="selected_message_id" @messageModified="onMessageModified"></MessageView>
 </template>

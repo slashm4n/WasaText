@@ -8,7 +8,6 @@ import (
 func (db *appdbimpl) GetMessage(msg_id int) (Message, error) {
 	var msg Message
 	var err error
-	//var row sql.row
 
 	// Query data
 	var sql = `SELECT msg_id, ifnull(forwarded_from_msg_id, 0), conversation_id, from_user_id,

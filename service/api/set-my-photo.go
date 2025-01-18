@@ -8,7 +8,7 @@ import (
 )
 
 // Contains info from the request body AND from local variable
-type SetPhotoRequest struct {
+type SetMyPhotoRequest struct {
 	User_id int
 	Photo   string `json:"photo"`
 }
@@ -21,12 +21,13 @@ func (rt *_router) setMyPhoto(w http.ResponseWriter, r *http.Request, ps httprou
 	if err != nil {
 		rt.baseLogger.Error(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 	rt.baseLogger.Info("authenticated user `", user.Name, "`, id ", user.Id, "")
 
 	// Read the request
-	var photoreq SetPhotoRequest
+	var photoreq SetMyPhotoRequest
 	err = json.NewDecoder(r.Body).Decode(&photoreq)
 	if err != nil {
 		http.Error(w, "invalid JSON data", http.StatusBadRequest)

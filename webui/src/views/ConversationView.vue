@@ -18,27 +18,23 @@ export default {
 			try {
 				if (this.selected_conversation_id == 0)
 				{
-					return;
-				}
+					this.messages = [];
+				} else {
+					const response = await this.$axios({
+						method: 'get',
+						url: '/conversations/' + this.selected_conversation_id,
+						headers: {
+							'Authorization' : 'Bearer ' + this.session_token
+						}
+					});
 
-				const response = await this.$axios({
-					method: 'get',
-					url: '/conversations/' + this.selected_conversation_id,
-					headers: {
-						'Authorization' : 'Bearer ' + this.session_token
+					if (response.status != 200) {
+						this.errormsg = "Unexpected response " + response.status;
+						return;
 					}
-				});
 
-				if (response.status != 200) {
-                    this.errormsg = "Unexpected response " + response.status;
-                    return;
-                }
-
-				this.messages = response.data;
-
-				// TO DO: scroll to end non funziona
-				// UPDATE: non più necessario conversazione in reverse chronological order
-				// this.$refs.convview.scrollIntoView();
+					this.messages = response.data;
+				}
 				this.errormsg = "";
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
@@ -66,6 +62,18 @@ export default {
 			this.$emit('conversationUpdated');
 		}
 	},
+	beforeMount: function () {
+        window.addEventListener('beforeunload', (e) => {
+            localStorage.setItem('messages',  JSON.stringify(this.messages));
+            localStorage.setItem('selected_message_id', JSON.stringify(this.selected_message_id));
+        });
+
+        try {
+            this.messages = JSON.parse(localStorage.getItem('messages'))
+            this.selected_message_id = JSON.parse(localStorage.getItem('selected_message_id'))
+        } catch {
+        }
+    }
 }
 </script>
 
@@ -76,10 +84,10 @@ export default {
 				v-for="(msg, index) in messages" :key="msg.id" :tabindex="index"
 				@click="onMessageClick(msg)">
 				<p v-if=!msg.is_photo>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
-				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg></img><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
+				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
 			</div>
 		</div>
 		
-		<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
 	</div>
 </template>

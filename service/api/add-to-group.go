@@ -24,6 +24,7 @@ func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprou
 	if err != nil {
 		rt.baseLogger.Error(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 	rt.baseLogger.Info("authenticated user `", user.Name, "`, id ", user.Id, "")

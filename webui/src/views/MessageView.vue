@@ -6,13 +6,47 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 <script>
 export default {
 	emits: ['messageModified'],
-    props: ['session_token', 'user', 'selected_message_id'],
+    props: ['session_token', 'user', 'all_users', 'selected_message_id'],
     data: function() {
 		return {
 			errormsg: '',
+			to_user_name_or_group_name: ''
 		}
 	},
 	methods: {
+		async doForwardMessage() {
+            if (this.selected_message_id == 0) {
+				return;
+			}
+			if (this.to_user_name_or_group_name == '') {
+				this.errormsg = "Receiver user not set";
+				return;
+			}
+
+			const is_group = this.to_user_name_or_group_name.substring(this.to_user_name_or_group_name.length - 8) == " (group)";
+			const name = is_group ? this.to_user_name_or_group_name.substring(0, this.to_user_name_or_group_name.length - 8) : this.to_user_name_or_group_name
+
+			try {
+				const response = await this.$axios({
+					method: 'post',
+					url: '/messages/' + this.selected_message_id,
+					headers: {
+						'Authorization' : 'Bearer ' + this.session_token
+					},
+					data: {
+                        "to_user_name_or_group_name": name,
+                        "is_group": is_group
+                    }
+				});
+
+				this.errormsg = '';
+			} catch (e) {
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
+			}
+		},
         async onDeleteMessage() {
             if (this.selected_message_id == 0) {
 				return;
@@ -27,6 +61,7 @@ export default {
 				});
 
 				this.$emit('messageModified', this.to_user_name);
+				this.errormsg = '';
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -48,6 +83,7 @@ export default {
 				});
 
 				this.$emit('messageModified', this.to_user_name);
+				this.errormsg = '';
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -82,6 +118,7 @@ export default {
                 }
 
 				this.$emit('messageModified', this.to_user_name);
+				this.errormsg = '';
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -99,21 +136,39 @@ export default {
         selected_message_id(newValue, oldValue) {
         }
 	},
+	beforeMount: function () {
+        window.addEventListener('beforeunload', (e) => {
+            localStorage.setItem('to_user_name_or_group_name',  JSON.stringify(this.to_user_name_or_group_name));
+        });
+
+        try {
+            this.to_user_name_or_group_name = JSON.parse(localStorage.getItem('to_user_name_or_group_name'))
+        } catch {
+        }
+    }
 }
 </script>
 
 <template>
 	<div v-if="session_token != 0">
 		<div class="message-container">
-			<div v-if="selected_message_id != 0" style="position: relative; top: 0.7em">
+			<div v-if="selected_message_id != 0" style="position: relative; top: 0.7em;">
+				<span style="position: relative; left:1em">.</span>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F600;">&#x1F600;</button>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F602;">&#x1F602;</button>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F621;">&#x1F621;</button>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F44D;">&#x1F44D;</button>
 				<button @click="onDeleteReaction">Remove</button>
 				<button @click="onDeleteMessage">Delete message</button>
+
+				<span class="label-flat">Forward message to</span>
+				<select style="z-index: 99; position:relative; height: 1.3em; width: 9.5em;" v-model="to_user_name_or_group_name" >
+					<option v-for="(u, index) in this.all_users" :key="index">{{ u.is_group ? u.group_name + " (group)" : u.user_name }}</option>
+				</select>
+				<input style="z-index: 100; position:absolute; top:0.2em; left: 32.8em; width: 8em;" v-model="to_user_name_or_group_name"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+				<button @click="doForwardMessage">Send</button>
 			</div>
 		</div>
-		<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
 	</div>
 </template>

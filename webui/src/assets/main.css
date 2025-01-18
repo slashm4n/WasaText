@@ -3,6 +3,7 @@ body {
     margin: 0px;
 	font-size: 1.2rem;
 	font-family: 'Noto Sans';
+	background-color: #d0d0d0;
 }
 
 input {
@@ -287,22 +288,19 @@ select {
 	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
 
-.error-header h2 {
+.error-header {
 	text-align: center;
 	color: #b94242;
 }
 
 .error-button {
 	position: relative;
-	left: -1em;
-	width: 50%;
-	min-width: 15em;
-	height: 40px;
-	font-size: 16px;
-	line-height: 1.5;
-	background-color: #42b983;
+	left: 1em;
+	min-width: 3em;
+	font-size: 1em;
+	background-color: #d95555;
 	border-radius: 4px;
 	color: white;
-	padding: 0px 0px;
+	padding: 0px 10px;
 }
 

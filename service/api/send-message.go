@@ -24,6 +24,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	if err != nil {
 		rt.baseLogger.Error(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 	rt.baseLogger.Info("authenticated user `", user.Name, "`, id ", user.Id, "")

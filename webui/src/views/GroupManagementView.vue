@@ -4,70 +4,31 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-    emits: ['userAddedToGroup'],
-	props: ['session_token'],
+    emits: ['groupsUpdated'],
+	props: ['session_token', 'my_groups'],
 	data: function() {
 		return {
             errormsg: '',
-            group: null,
-            user_name_to_add: '',
-            group_name: '',
+            selected_group: null,
             new_group_name: ''
 		}
 	},
 	methods: {
-        async doAddToGroup() {
+        async doSetGroupName() {
             try {
-                if (this.user_name_to_add == '') {
-                    this.errormsg = "User to add not set";
-                    return;
-                }
-
-                if (this.group_name == '') {
+                if (this.selected_group == null) {
                     this.errormsg = "Group name not set";
                     return;
                 }
-                
-                const res = await this.$axios({
-                    method: 'put',
-                    url: '/groups',
-                    headers: {
-                        'Authorization' : 'Bearer ' + this.session_token
-                    },
-                    data: {
-                        "user_name_to_add": this.user_name_to_add,
-                        "group_name": this.group_name
-                    }
-                });
 
-                if (res.status != 201) {
-                    this.errormsg = "Unexpected response " + res.status;
-                    return;
-                }
-
-                this.$emit('userAddedToGroup');
-                this.user_name_to_add = ''
-                this.group_name = '';
-                this.errormsg = "";
-            } catch (e) {
-                if (e.response != null && e.response.data != "")
-                    this.errormsg = "Error: " + e.response.data;
-                else
-                    this.errormsg = "Error: " + e;
-            }
-        },
-        async doSetGroupName() {
-            this.errormsg = "Not implemented";
-            return;
-            try {
                 if (this.new_group_name == '') {
                     this.errormsg = "New user group not set";
                     return;
                 }
                 
                 const res = await this.$axios({
-                    method: 'put',
-                    url: '/groups',
+                    method: 'post',
+                    url: '/groups/' + this.selected_group.group_id,
                     headers: {
                         'Authorization' : 'Bearer ' + this.session_token
                     },
@@ -81,9 +42,7 @@ export default {
                     return;
                 }
 
-                // this.$emit('groupNameChanged');
-                this.user_name_to_add = ''
-                this.group_name = '';
+                this.$emit('groupsUpdated');
                 this.new_group_name = '';
                 this.errormsg = "";
             } catch (e) {
@@ -98,24 +57,24 @@ export default {
         // await need to be on the top level of an async method
         async doUploadGroupPhoto(img)
         {
-            this.errormsg = "Not implemented";
-            return;
             try {
                 const res = await this.$axios({
                     method: 'put',
-                    url: '/user/photo',
+                    url: '/group/photo',
                     headers: {
                         'Authorization' : 'Bearer ' + this.session_token
                     },
                     data: {
+                        "group_id": this.selected_group.group_id,
                         "photo": img
                     }
                 });
 
                 if (res.status != 200) {
-                    this.errormsg = "Problem while updating the profile photo";
+                    this.errormsg = "Problem while updating the group photo";
                 }
 
+                this.$emit('groupsUpdated');
                 this.errormsg = "";
             } catch (e) {
                 if (e.response != null && e.response.data != "")
@@ -133,13 +92,33 @@ export default {
                 this.doUploadGroupPhoto(evn.target.result);
                 this.group.photo = evn.target.result;
             };
-        }
+        },
+
+        async onPhotoGroupUploaderClick() {
+            this.$refs.photoGroupUploader.value = ''
+        },
     },
     watch: {
         session_token(newValue, oldValue) {
-            if (newValue) {
+      		if (this.session_token == 0) {
+                this.group = null;
+                this.new_group_name = '';
+            }
+            else {
                 this.errormsg = '';
             }
+		}
+    },
+    beforeMount: function () {
+        window.addEventListener('beforeunload', (e) => {
+            localStorage.setItem('selected_group',  JSON.stringify(this.group));
+            localStorage.setItem('new_group_name', JSON.stringify(this.new_group_name));
+        });
+
+        try {
+            this.group = JSON.parse(localStorage.getItem('selected_group'))
+            this.new_group_name = JSON.parse(localStorage.getItem('new_group_name'))
+        } catch {
         }
     }
 }
@@ -149,16 +128,16 @@ export default {
     <div v-if="session_token != 0">
         <div class="group-management-container">
             <div style="position:relative; top: 0.7em; float: left;">
-	    		<span class="label-flat">Group</span>
-		    	<input v-model="group_name" autocomplete="off" placeholder="Group name"></input>
-    			<input v-model="user_name_to_add" autocomplete="off" placeholder="New member"></input>
-	    		<button @click="doAddToGroup">Apply</button>
-                <input v-model="new_group_name" autocomplete="off" placeholder="New group name"></input>
+	    		<span class="label-flat">For group</span>
+                <select style="z-index: 99; position:relative; height: 1.3em; width: 9.5em;" v-model="selected_group" >
+                    <option v-for="(g, index) in this.my_groups" :value="g">{{ g.group_name }}</option>
+                </select>                
+                <input v-model="new_group_name" placeholder="New group name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 			    <button @click="doSetGroupName">Apply</button>
                 <label for="photoGroupUploader" class="label-button">Set photo</label>
-                <input type="file" accept="image/*" hidden="true" id="photoGroupUploader" @change="doSetGroupPhoto">
+                <input type="file" accept="image/*" hidden="true" id="photoGroupUploader" ref="photoGroupUploader" @click="onPhotoGroupUploaderClick" @change="doSetGroupPhoto">
             </div>
         </div>
-        <ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
+        <ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
     </div>
 </template>

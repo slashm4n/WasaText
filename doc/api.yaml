@@ -139,6 +139,7 @@ paths:
         schema:
           type: integer
           description: e.g. 123
+          min: 1
     get:
       tags:
         - Conversation
@@ -209,7 +210,8 @@ paths:
         description: The id of a message
         schema:
           type: integer
-          description: message/123
+          description: the id of the message 123
+          min: 1
     delete:
       tags:
         - Message
@@ -242,13 +244,18 @@ paths:
                   type: integer
                   description: the id of the conversation
                   example: 123
-                to_user:
+                  min: 1
+                to_user_name_or_group_name:
                   type: string
-                  description: the name of the receiver user
+                  description: the name of the receiver user or group
                   pattern: ^.*?$
                   minLength: 3
                   maxLength: 16
                   example: "Davide"
+                is_group:
+                  type: boolean
+                  description: whether the to_user_name_or_group_name is a user name or a group name
+                  example: false
       responses:
         '201':
           description: Message sent
@@ -265,7 +272,8 @@ paths:
         description: The id of a message
         schema:
           type: integer
-          description: message/1234
+          description: the id of the message, 1234
+          min: 1
     post:
       tags:
         - Message
@@ -309,6 +317,36 @@ paths:
 
 
   /groups:
+    get:
+      tags:
+        - Group
+      description: |-
+        Return the list of groups that belongs to the logged user.
+      operationId: getMyGroups
+      summary: Get the list of groups that belongs to the logged user
+      responses:
+        "200":
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                description: The list of groups
+                type: array
+                minItems: 1
+                maxItems: 1000
+                items: { $ref: "#/components/schemas/Group" }
+
+
+  /groups/{group_id}:
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        description: group id
+        schema:
+          type: integer
+          description: Group id
+          min: 1
     put:
       tags:
         - Group
@@ -317,7 +355,7 @@ paths:
         Add user to an existing or new group
       operationId: addToGroup
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -344,27 +382,6 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Group" }
-    get:
-      tags:
-        - Group
-      description: |-
-        Return the list of groups that belongs to the logged user.
-      operationId: getMyGroups
-      summary: Get the list of groups that belongs to the logged user
-      responses:
-        "200":
-          description: List of groups
-          content:
-            application/json:
-              schema:
-                description: The list of groups
-                type: array
-                minItems: 1
-                maxItems: 1000
-                items: { $ref: "#/components/schemas/Group" }
-
-
-  /groups/{group_id}:
     delete:
       tags:
         - Group
@@ -372,14 +389,6 @@ paths:
       description: |-
         Leave a group
       operationId: leaveGroup
-      parameters:
-        - name: group_id
-          description: group id
-          in: path
-          required: true
-          schema:
-            type: integer
-            description: Group id
       responses:
         '200':
           description: Group successfully left
@@ -394,14 +403,6 @@ paths:
       description: |-
         Set group name
       operationId: setGroupName
-      parameters:
-        - name: group_id
-          description: group id
-          in: path
-          required: true
-          schema:
-            description: Group id
-            type: integer
       requestBody:
         required: true
         content:
@@ -441,7 +442,7 @@ paths:
               type: object
               description: User photo
               properties:
-                image:
+                photo:
                   type: object
                   description: the profile photo
         required: true
@@ -469,6 +470,15 @@ paths:
             schema:
               type: object
               description: Group photo
+              properties:
+                group_id:
+                  type: integer
+                  description: the id of the group
+                  min: 1
+                  example: 123
+                photo:
+                  type: object
+                  description: the profile photo
         required: true
       responses:
         '200':
@@ -492,6 +502,7 @@ components:
           type: integer
           example: 1234
           readOnly: true
+          min: 1
         name:
           description: "The user name"
           type: string
@@ -510,6 +521,7 @@ components:
           type: integer
           example: 1234
           readOnly: true
+          min: 1
         name:
           type: string
           description: name
@@ -531,6 +543,7 @@ components:
           type: integer
           example: 1234
           readOnly: true
+          min: 1
         name:
           description: "The message"
           type: string
@@ -546,6 +559,7 @@ components:
           type: integer
           example: 1234
           readOnly: true
+          min: 1
         name:
           description: "The comment"
           type: string
@@ -561,6 +575,7 @@ components:
           type: integer
           example: 1234
           readOnly: true
+          min: 1
         name:
           type: string
           description: the group's name

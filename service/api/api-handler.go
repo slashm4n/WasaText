@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// Handler returns an instance of httprouter.Router that handle APIs registered here
+// Handler returns an instance of httprouter. Router that handle APIs registered here
 func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/session", rt.doLogin)
 	rt.router.PUT("/user", rt.setMyUserName)
@@ -17,8 +17,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PUT("/user/photo", rt.setMyPhoto)
 	rt.router.POST("/messages/:msg_id/comments", rt.commentMessage)
 	rt.router.DELETE("/messages/:msg_id/comments", rt.uncommentMessage)
-	rt.router.PUT("/groups", rt.addToGroup)
 	rt.router.GET("/groups", rt.getMyGroups)
+	rt.router.PUT("/groups/:id", rt.addToGroup)
 	rt.router.DELETE("/groups/:id", rt.leaveGroup)
 	rt.router.POST("/groups/:id", rt.setGroupName)
 	rt.router.PUT("/group/photo", rt.setGroupPhoto)

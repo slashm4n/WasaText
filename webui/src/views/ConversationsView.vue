@@ -41,9 +41,12 @@ export default {
 			this.errormsg = "";
 		},
 		async onConversationClick(conv) {
-			console.log(`Clicked on ${conv.user_or_group_name}`);
 			this.selected_conversation_id = conv.conversation_id;
 			this.$emit('selectedConversationChanged', this.selected_conversation_id);
+		},
+		async onConversationFocusOut() {
+			this.selected_conversation_id = 0;
+			// this.$emit('selectedConversationChanged', this.selected_conversation_id);
 		}
   	},
   	watch: {
@@ -58,20 +61,32 @@ export default {
 	      		this.doUpdateConversationsList();
 			// TO DO: selezionare la conversazione
 		}
-	}
+	},
+	beforeMount: function () {
+        window.addEventListener('beforeunload', (e) => {
+            localStorage.setItem('conversations',  JSON.stringify(this.conversations));
+            localStorage.setItem('selected_conversation_id', JSON.stringify(this.selected_conversation_id));
+        });
+
+        try {
+            this.conversations = JSON.parse(localStorage.getItem('conversations'))
+            this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'))
+        } catch {
+        }
+    }
 }
 </script>
 
 <template>
 	<div v-if="session_token != 0">
 		<div class="conversations-container" v-if="session_token != 0">
-			<div class="conv-box" v-for="(c, index) in conversations" :key="c.id" :tabindex="index" @click="onConversationClick(c)">
-				<img v-if="c.user_or_group_photo != ''" class="photo-box" v-bind:src="c.user_or_group_photo"></img>
-				<img v-if="c.user_or_group_photo == ''" class="photo-box" src="../assets/profile.png"></img>
+			<div class="conv-box" v-for="(c, index) in conversations" :key="c.id" :tabindex="index" @click="onConversationClick(c)" @focusout = "onConversationFocusOut">
+				<img v-if="c.user_or_group_photo != ''" class="photo-box" v-bind:src="c.user_or_group_photo">
+				<img v-if="c.user_or_group_photo == ''" class="photo-box" src="../assets/profile.png">
 				<span class="name-box">{{ c.user_or_group_name }}</span>
 				<span class="group-flag-box">{{ c.is_group ? ` (group)` : ``  }}</span>
 			</div>
 		</div>
-		<ErrorMsg :errormsg="errormsg" @errorWindowClosed="this.errormsg = '';"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
 	</div>
 </template>

@@ -72,6 +72,8 @@ type AppDatabase interface {
 	GetMyGroups(int) ([]Group, error)
 	GetGroupDataFromName(group_name string) (int, string, int, error)
 	GetNextGroupId() (int, error)
+	SetGroupName(group_id int, group_name string) error
+	SetGroupPhoto(group_id int, photo string) error
 }
 
 type appdbimpl struct {
