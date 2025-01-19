@@ -50,8 +50,10 @@ export default {
 	},
 	watch: {
     	session_token(newValue, oldValue) {
-			if (newValue) {
+			if (newValue == 0) {
 				this.errormsg = '';
+				this.messages = [];
+				this.selected_message_id = 0;
 			}
 		},
     	selected_conversation_id(newValue, oldValue) {

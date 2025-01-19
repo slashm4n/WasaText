@@ -4,19 +4,20 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-    emits: ['messageSent', 'allUsersListUpdated', 'usersUpdated', 'myConversationsUpdated'],
-	props: ['session_token', 'user', 'all_users', 'need_update_all_users_list'],
+    emits: ['messageSent', 'allUsersListUpdated', 'usersUpdated'],
+	props: ['session_token', 'user', 'all_users', 'my_groups'],
 	data: function() {
 		return {
             errormsg: '',
-            to_user_name_or_group_name: '',
-            message: ''
+            for_user_name_or_group_name: '',
+            message: '',
+            group_name: ''
 		}
 	},
 	methods: {
 		async doSendMessage() {
             try {
-                if (this.to_user_name_or_group_name == '') {
+                if (this.for_user_name_or_group_name == '') {
                     this.errormsg = "Receiver user not set";
                     return;
                 }
@@ -26,8 +27,8 @@ export default {
                     return;
                 }
                 
-                const is_group = this.to_user_name_or_group_name.substring(this.to_user_name_or_group_name.length - 8) == " (group)";
-                const name = is_group ? this.to_user_name_or_group_name.substring(0, this.to_user_name_or_group_name.length - 8) : this.to_user_name_or_group_name
+                const is_group = this.for_user_name_or_group_name.substring(this.for_user_name_or_group_name.length - 4) == " (G)";
+                const name = is_group ? this.for_user_name_or_group_name.substring(0, this.for_user_name_or_group_name.length - 4) : this.for_user_name_or_group_name
 
                 const res = await this.$axios({
                     method: 'post',
@@ -47,8 +48,7 @@ export default {
                     return;
                 }
 
-                //this.$emit('messageSent', this.to_user_name_or_group_name);
-                this.$emit('myConversationsUpdated');
+                this.$emit('messageSent', this.for_user_name_or_group_name);
                 this.message = '';
 
                 this.errormsg = '';
@@ -65,8 +65,8 @@ export default {
         async doSendPhotoAsync(img)
         {
             try {
-                const is_group = this.to_user_name_or_group_name.substring(this.to_user_name_or_group_name.length - 8) == " (group)";
-                const name = is_group ? this.to_user_name_or_group_name.substring(0, this.to_user_name_or_group_name.length - 8) : this.to_user_name_or_group_name
+                const is_group = this.for_user_name_or_group_name.substring(this.for_user_name_or_group_name.length - 4) == " (G)";
+                const name = is_group ? this.for_user_name_or_group_name.substring(0, this.for_user_name_or_group_name.length - 4) : this.for_user_name_or_group_name
 
                 const res = await this.$axios({
                     method: 'post',
@@ -86,9 +86,7 @@ export default {
                     return;
                 }
 
-                // this.$emit('messageSent', this.to_user_name_or_group_name);
-                this.$emit('myConversationsUpdated');
-                this.message = '';
+                this.$emit('messageSent', this.for_user_name_or_group_name);
 
                 this.errormsg = '';
             } catch (e) {
@@ -100,7 +98,7 @@ export default {
         },
 
         async doSendPhoto(e) {
-            if (this.to_user_name_or_group_name == '') {
+            if (this.for_user_name_or_group_name == '') {
                 this.errormsg = "Receiver user not set";
                 return;
             }
@@ -121,12 +119,12 @@ export default {
 
         async doAddToGroup() {
             try {
-                if (this.to_user_name_or_group_name == '') {
+                if (this.for_user_name_or_group_name == '') {
                     this.errormsg = "User to add not set";
                     return;
                 }
                 
-                const is_group = this.to_user_name_or_group_name.substring(this.to_user_name_or_group_name.length - 8) == " (group)";
+                const is_group = this.for_user_name_or_group_name.substring(this.for_user_name_or_group_name.length - 4) == " (G)";
                 if (is_group) {
                     this.errormsg = "Can't add a group to another group";
                     return;
@@ -144,7 +142,7 @@ export default {
                         'Authorization' : 'Bearer ' + this.session_token
                     },
                     data: {
-                        "user_name_to_add": this.to_user_name_or_group_name,
+                        "user_name_to_add": this.for_user_name_or_group_name,
                         "group_name": this.group_name
                     }
                 });
@@ -169,27 +167,25 @@ export default {
 	},
     watch: {
     	session_token(newValue, oldValue) {
-      		if (this.session_token == 0) {
-                this.to_user_name_or_group_name = '';
-                this.message = '';
-            }
-            else {
+      		if (newValue == 0) {
                 this.errormsg = '';
+                this.for_user_name_or_group_name = '';
+                this.message = '';
+                this.group_name = '';
             }
-		},
-        all_users(newValue, oldValue) {
-            // no more necessary. to remove
-        }
+		}
 	},
     beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
-            localStorage.setItem('to_user_name_or_group_name',  JSON.stringify(this.to_user_name_or_group_name));
+            localStorage.setItem('for_user_name_or_group_name',  JSON.stringify(this.for_user_name_or_group_name));
             localStorage.setItem('message',  JSON.stringify(this.message));
+            localStorage.setItem('group_name',  JSON.stringify(this.group_name));
         });
 
         try {
-            if (localStorage.getItem('to_user_name_or_group_name') != null) this.to_user_name_or_group_name = JSON.parse(localStorage.getItem('to_user_name_or_group_name'))
+            if (localStorage.getItem('for_user_name_or_group_name') != null) this.for_user_name_or_group_name = JSON.parse(localStorage.getItem('for_user_name_or_group_name'))
             if (localStorage.getItem('message') != null) this.message = JSON.parse(localStorage.getItem('message'))
+            if (localStorage.getItem('group_name') != null) this.group_name = JSON.parse(localStorage.getItem('group_name'))
         } catch {
         }
     }
@@ -201,16 +197,20 @@ export default {
         <div class="send-message-container">
             <div style="position:relative; top: 0.7em; float: left;">
                 <span class="label-flat">For user</span>
-                <select style="z-index: 99; position:relative; height: 1.3em; width: 9.5em;" v-model="to_user_name_or_group_name" >
-                    <option v-for="(u, index) in this.all_users" :key="index">{{ u.is_group ? u.group_name + " (group)" : u.user_name }}</option>
+                <select id="forUserNameInput" style="position:relative; height: 1.3em; width: 10em;" v-model="for_user_name_or_group_name">
+                    <option v-for="(u, index) in all_users" :key="index">{{ u.is_group ? u.group_name + " (G)" : u.user_name }}</option>
                 </select>
-                <input style="z-index: 100; position:absolute; top:0.2em; left: 5.3em; width: 8em;" v-model="to_user_name_or_group_name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                <input v-model="message" placeholder="Message">
+                <input id="messageInput" v-model="message" placeholder="Message">
                 <button @click="doSendMessage">Send</button>
                 <label for="photoSender" class="label-button">Send photo</label>
-                <input type="file" accept="image/*" hidden="true" id="photoSender" ref="photoSender" @click="onImageUploaderClick" @change="doSendPhoto">
+                <p></p>
+                <input id="photoSender" ref="photoSender" type="file" accept="image/*" hidden="true" @click="onImageUploaderClick" @change="doSendPhoto">
                 <span class="label-flat">add to group</span>
-                <input v-model="group_name" placeholder="Group name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <select id="groupNameInput" style="position:relative; height: 1.3em; width: 9em;" v-model="group_name">
+                    <option v-for="(u, index) in my_groups" :key="index">{{ u.group_name }}</option>
+                </select>
+                <span class="label-flat">or</span>
+                <input id="newGroupInput" v-model="group_name" placeholder="New group" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 <button @click="doAddToGroup">Apply</button>
             </div>
         </div>

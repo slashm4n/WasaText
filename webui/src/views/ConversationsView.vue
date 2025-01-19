@@ -51,15 +51,18 @@ export default {
   	},
   	watch: {
     	session_token(newValue, oldValue) {
-			if (newValue) {
-				this.doUpdateConversationsList();
-				this.errormsg = '';
+			if (newValue == 0) {
+				this.errormsg = '',
+				this.conversations = [],
+				this.selected_conversation_id = 0
 			}
+			else
+				this.doUpdateConversationsList();
 		},
     	need_update_conversations_list(newValue, oldValue) {
 			if (newValue)
 	      		this.doUpdateConversationsList();
-			// TO DO: selezionare la conversazione
+			// TO DO: riselezionare l'ultima conversazione
 		}
 	},
 	beforeMount: function () {
@@ -83,8 +86,8 @@ export default {
 			<div class="conv-box" v-for="(c, index) in conversations" :key="c.id" :tabindex="index" @click="onConversationClick(c)" @focusout = "onConversationFocusOut">
 				<img v-if="c.user_or_group_photo != ''" class="photo-box" v-bind:src="c.user_or_group_photo">
 				<img v-if="c.user_or_group_photo == ''" class="photo-box" src="../assets/profile.png">
-				<span class="name-box">{{ c.user_or_group_name }}</span>
-				<span class="group-flag-box">{{ c.is_group ? ` (group)` : ``  }}</span>
+				<span class="name-box">{{ c.user_or_group_name }}{{ c.is_group ? ' (G)' : '' }}</span>
+				<span class="snippet-box">{{ c.last_timestamp }} {{ c.last_msg.substring(0, 11) == "data:image/" ? "&#x1F4F7;" : c.last_msg.substring(0, 8) }}</span>
 			</div>
 		</div>
 		<ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>

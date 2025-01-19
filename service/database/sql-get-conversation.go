@@ -6,7 +6,7 @@ import "fmt"
 func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 	// Query data
 	var sql = `SELECT MESSAGES.msg_id, ifnull(forwarded_from_msg_id, 0), conversation_id, MESSAGES.from_user_id,
-				strftime ("%H:%M", sent_timestamp) AS timestamp, msg, iif(substr(msg, 1, 11)='data:image/', true, false) AS is_photo,
+				strftime("%H:%M", sent_timestamp) AS timestamp, msg, iif(substr(msg, 1, 11)='data:image/', true, false) AS is_photo,
 				ifnull(R1.reaction_user, "") AS reaction, ifnull(S1.msg_id, 0) != 0 AS seen
 				FROM MESSAGES
 				LEFT JOIN
@@ -14,6 +14,7 @@ func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 						SELECT msg_id, from_user_id, group_concat(reaction || USERS.user_name) as reaction_user
 						FROM REACTIONS
 						INNER JOIN USERS ON USERS.user_id = REACTIONS.from_user_id
+						GROUP BY msg_id
 					) AS R1
 					ON R1.msg_id=MESSAGES.msg_id
 				LEFT JOIN USERS ON USERS.user_id = R1.from_user_id
@@ -23,6 +24,7 @@ func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 						FROM MESSAGES, CONVERSATIONS_USERS
 						INNER JOIN MESSAGES_SEEN ON MESSAGES_SEEN.msg_id = MESSAGES.msg_id AND MESSAGES_SEEN.seen_by_user_id = CONVERSATIONS_USERS.user_id
 						WHERE CONVERSATIONS_USERS.user_id != MESSAGES.from_user_id
+						GROUP BY MESSAGES.msg_id
 					) AS S1 ON MESSAGES.msg_id = S1.msg_id
 				WHERE conversation_id = ` + fmt.Sprint(conversation_id) + ` ORDER BY sent_timestamp DESC`
 

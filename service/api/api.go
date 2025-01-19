@@ -39,7 +39,6 @@ package api
 import (
 	"WasaText/service/database"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -120,7 +119,7 @@ func AuthenticateUser(r *http.Request) (User, error) {
 
 	user = sessions[session_token]
 	if user.Id == 0 {
-		err = errors.New("unrecognized o elapsed session token " + fmt.Sprint(session_token_str))
+		err = errors.New("unrecognized o elapsed session, login again")
 		return user, err
 	}
 	return user, nil

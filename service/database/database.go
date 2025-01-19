@@ -41,6 +41,8 @@ type Conversation struct {
 	User_or_group_name  string `json:"user_or_group_name"`
 	User_or_group_photo string `json:"user_or_group_photo"`
 	Is_group            int    `json:"is_group"`
+	Last_timestamp      string `json:"last_timestamp"`
+	Last_msg            string `json:"last_msg"`
 }
 
 // AppDatabase is the high level interface for the DB
@@ -75,6 +77,7 @@ type AppDatabase interface {
 	GetNextGroupId() (int, error)
 	SetGroupName(group_id int, group_name string) error
 	SetGroupPhoto(group_id int, photo string) error
+	LeaveGroup(user_id int, group_id int) error
 }
 
 type appdbimpl struct {

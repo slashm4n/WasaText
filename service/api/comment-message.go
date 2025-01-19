@@ -43,8 +43,15 @@ func (rt *_router) commentMessage(w http.ResponseWriter, r *http.Request, ps htt
 
 	// TO DO: should verify the message belongs to a user’s conversation
 
+	// Before commenting remove the existing user comment
+	err = rt.db.UncommentMessage(req.Msg_id, user.Id)
+	if err != nil {
+		rt.baseLogger.Error("error while uncommenting a message (" + err.Error() + ")")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	// Comment the message
-	// var reaction_id int
 	_, err = rt.db.CommentMessage(req.Msg_id, user.Id, req.Reaction)
 	if err != nil {
 		rt.baseLogger.Error("error while commenting a message (" + err.Error() + ")")

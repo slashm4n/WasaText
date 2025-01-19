@@ -5,7 +5,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-	emits: ['messageModified'],
+	emits: ['messageModified', 'messageForwarded'],
     props: ['session_token', 'user', 'all_users', 'selected_message_id'],
     data: function() {
 		return {
@@ -39,6 +39,7 @@ export default {
                     }
 				});
 
+                this.$emit('messageForwarded', name);
 				this.errormsg = '';
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
@@ -129,8 +130,9 @@ export default {
 	},
 	watch: {
 		session_token(newValue, oldValue) {
-			if (newValue) {
+			if (newValue == 0) {
 				this.errormsg = '';
+				this.to_user_name_or_group_name = '';
 			}
 		},
         selected_message_id(newValue, oldValue) {
@@ -160,12 +162,10 @@ export default {
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F44D;">&#x1F44D;</button>
 				<button @click="onDeleteReaction">Remove</button>
 				<button @click="onDeleteMessage">Delete message</button>
-
-				<span class="label-flat">Forward message to</span>
-				<select style="z-index: 99; position:relative; height: 1.3em; width: 9.5em;" v-model="to_user_name_or_group_name" >
-					<option v-for="(u, index) in this.all_users" :key="index">{{ u.is_group ? u.group_name + " (group)" : u.user_name }}</option>
+				<span class="label-flat">Forward to</span>
+				<select id="userNameInput" style="position:relative; height: 1.3em; width: 9.5em;" v-model="to_user_name_or_group_name" >
+					<option v-for="(u, index) in all_users" :key="index">{{ u.is_group ? u.group_name + " (group)" : u.user_name }}</option>
 				</select>
-				<input style="z-index: 100; position:absolute; top:0.2em; left: 32.8em; width: 8em;" v-model="to_user_name_or_group_name"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 				<button @click="doForwardMessage">Send</button>
 			</div>
 		</div>

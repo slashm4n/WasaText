@@ -3,7 +3,6 @@ package api
 import (
 	"WasaText/service/database"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,30 +12,23 @@ import (
 
 // Get conversation AND mark messages as seen by the caller user
 func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	// Authenticate user through session token
+	var user User
 	var err error
+	user, err = AuthenticateUser(r)
+	if err != nil {
+		rt.baseLogger.Error(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(err.Error())
+		return
+	}
+	rt.baseLogger.Info("authenticated user `", user.Name, "`, id ", user.Id, "")
 
 	// Verify the db is ok
 	if err = rt.db.Ping(); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	// Get and verify the session token
-	session_token_str := r.Header["Authorization"][0]
-	if len(session_token_str) <= 7 {
-		rt.baseLogger.Error("session token non settato, ricevuto solo 'Bearer '")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	session_token_str = strings.Split(session_token_str, " ")[1]
-	session_token, _ := strconv.ParseInt(session_token_str, 10, 64)
-	var user = sessions[session_token]
-	if user.Id == 0 {
-		rt.baseLogger.Error("unrecognized o elapsed session token: " + fmt.Sprint(session_token))
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	rt.baseLogger.Info("used session token ", session_token_str, " for the user `", user.Name, "` (id ", user.Id, ")")
 
 	// Retrieve the conversation_id and check if it belongs to the user
 	conversation_id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/conversations/"))

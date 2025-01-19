@@ -37,7 +37,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 	// TO DO: should verify that the message belongs to a user's conversation
 	req.From_msg_id, err = strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/messages/"))
 	if err != nil {
-		rt.baseLogger.Error("error reading message id from the path (" + err.Error() + ")")
+		rt.baseLogger.Error("error while reading message id from the path (" + err.Error() + ")")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

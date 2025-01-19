@@ -98,14 +98,19 @@ export default {
 		},
 
 		async doLogout() {
-            // this.username = '';
-            this.new_name = '';
+            this.errormsg = '';
             this.session_token = 0;
+            // this.username = ''; // we leave the username for ease
+            this.new_name = '';
             this.user = null;
+            this.all_users = null;
+            this.my_groups = null;
             this.selected_conversation_id = 0;
             this.selected_message_id = 0;
+            this.need_update_conversations_list = false;
             this.need_update_conversation = false;
-            this.errormsg = '';
+            this.need_update_all_users_list = false;
+            this.need_update_groups_list = false;
         },
 
 		async doSetMyUserName(new_name) {
@@ -303,14 +308,12 @@ export default {
         },
         
         async onMessageSent(to_user_name) {
-            if (this.selected_conversation_id == 0) {
-                // TO DO: should force the refreash of the list of conversations and the selection of the conversation
-                this.need_update_conversations_list = true;
-            }
+            this.need_update_conversations_list = true;
             this.need_update_conversation = true;
         },
 
         async onMessageModified(to_user_name) {
+            this.need_update_conversations_list = true;
             this.need_update_conversation = true;
         },
 
@@ -327,8 +330,10 @@ export default {
         }
     },
     beforeMount: function () {
-        // localStorage.clear(); uncomment only for testing a new installation!
+        // uncomment ONLY for testing a new installation!
+        // localStorage.clear();
 
+        // save the state
         window.addEventListener('beforeunload', (e) => {
             localStorage.setItem('session_token',  JSON.stringify(this.session_token));
             localStorage.setItem('username', JSON.stringify(this.username));
@@ -343,6 +348,7 @@ export default {
             localStorage.setItem('need_update_all_users_list', JSON.stringify(this.need_update_all_users_list));
         });
 
+        // retrieve the state
         try {
             if (localStorage.getItem('session_token') != null) this.session_token = JSON.parse(localStorage.getItem('session_token'));
             if (localStorage.getItem('username') != null) this.username = JSON.parse(localStorage.getItem('username'));
@@ -364,27 +370,25 @@ export default {
 <template>
     <div class="login-container">
         <div style="position: relative; top: 0.7em; float: left;">
-            <input v-if="session_token == 0" id="username" v-model="username" type="text" placeholder="User name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input id="userNameInput" v-if="session_token == 0" v-model="username" type="text" placeholder="User name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <button v-if="session_token == 0" @click="doLogin">Login</button>
-            
             <img v-if="session_token != 0 && user != null && user.photo !=''" class="photo-box" style="top:-0.7em" v-bind:src="user.photo">
             <img v-if="session_token != 0 && user != null && user.photo ==''" class="photo-box" style="top:-0.7em" src="../assets/profile.png">
-            
             <span v-if="session_token != 0 && user != null" style="position: relative; top:-1.8em">
                 <span class="label-flat" style="font-weight: bold;">{{ user.name }}</span>
                 <button @click="doLogout">Logout</button>
-                <input type="text" v-model="new_name" placeholder="New name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <input id="newNameInput" type="text" v-model="new_name" placeholder="New name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 <button @click="doSetMyUserName(new_name)">Apply</button>
                 <label for="photoUploader" class="label-button">Set photo</label>
-                <input type="file" accept="image/*" hidden="true" id="photoUploader" ref="photoUploader" @click="onPhotoUploaderClick" @change="doSetMyPhoto">
+                <input id="photoUploader" ref="photoUploader" type="file" accept="image/*" hidden="true" @click="onPhotoUploaderClick" @change="doSetMyPhoto">
             </span>
         </div>
     </div>
     
     <ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
-    <OtherUserView :session_token="session_token" :user="user" :all_users="all_users" @myConversationsUpdated="onMyConversationsUpdated" @usersUpdated="onNeedUpdateAllUsersList" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent"></OtherUserView>
+    <OtherUserView :session_token="session_token" :user="user" :all_users="all_users" :my_groups="my_groups" @usersUpdated="onNeedUpdateAllUsersList" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent"></OtherUserView>
     <GroupManagementView :session_token="session_token" :my_groups="my_groups" @groupsUpdated="onNeedUpdateMyGroupsList"></GroupManagementView>
     <ConversationsView :session_token="session_token" :user="user" :need_update_conversations_list="need_update_conversations_list" @selectedConversationChanged="onSelectedConversationChanged" @conversationsListUpdated="onConversationsListUpdated"></ConversationsView>
     <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id" :need_update_conversation="need_update_conversation" @selectedMessageChanged="onSelectedMessageChanged" @conversationUpdated="onConversationUpdated"></ConversationView>
-    <MessageView :session_token="session_token" :user="user" :all_users="all_users" :selected_message_id="selected_message_id" @messageModified="onMessageModified"></MessageView>
+    <MessageView :session_token="session_token" :user="user" :all_users="all_users" :selected_message_id="selected_message_id" @messageModified="onMessageModified" @messageForwarded="onMessageSent"></MessageView>
 </template>
