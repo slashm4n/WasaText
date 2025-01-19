@@ -4,13 +4,14 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-	emits: ['selectedConversationChanged', 'conversationsListUpdated'],
+	emits: ['selectedConversationChanged', 'conversationsListUpdated', 'reloginNeeded'],
 	props: ['session_token', 'user', 'need_update_conversations_list'],
 	data() {
 		return {
 			errormsg: '',
-			conversations: [],
-			selected_conversation_id: 0
+			conversations: null,
+			selected_conversation_id: 0,
+			need_reload: false
 		}
 	},
 	methods: {
@@ -46,7 +47,6 @@ export default {
 		},
 		async onConversationFocusOut() {
 			this.selected_conversation_id = 0;
-			// this.$emit('selectedConversationChanged', this.selected_conversation_id);
 		}
   	},
   	watch: {
@@ -67,16 +67,21 @@ export default {
 	},
 	beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
-            localStorage.setItem('conversations',  JSON.stringify(this.conversations));
-            localStorage.setItem('selected_conversation_id', JSON.stringify(this.selected_conversation_id));
+			try {
+         	    localStorage.setItem('conversations',  JSON.stringify(this.conversations));
+	            localStorage.setItem('selected_conversation_id', JSON.stringify(this.selected_conversation_id));
+			} catch {
+				this.$emit('reloginNeeded');
+			}
         });
 
         try {
             if (localStorage.getItem('conversations') != null) this.conversations = JSON.parse(localStorage.getItem('conversations'));
             if (localStorage.getItem('selected_conversation_id') != null) this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'));
         } catch {
+			this.$emit('reloginNeeded');
         }
-    }
+    },	
 }
 </script>
 

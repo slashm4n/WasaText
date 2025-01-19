@@ -327,6 +327,17 @@ export default {
 
         async onMyConversationsUpdated() {
             this.need_update_conversations_list = true;
+        },
+
+        async onReloginNeeded() {
+            // non funziona cambiare evento?
+            // window.addEventListener('load', (e) => {
+                // this.errormsg = "some values get lost during refresh, need to relogin";
+            // })
+        },
+
+        async onErrorDismissed() {
+            this.errormsg = '';
         }
     },
     beforeMount: function () {
@@ -385,10 +396,10 @@ export default {
         </div>
     </div>
     
-    <ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
-    <OtherUserView :session_token="session_token" :user="user" :all_users="all_users" :my_groups="my_groups" @usersUpdated="onNeedUpdateAllUsersList" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent"></OtherUserView>
-    <GroupManagementView :session_token="session_token" :my_groups="my_groups" @groupsUpdated="onNeedUpdateMyGroupsList"></GroupManagementView>
-    <ConversationsView :session_token="session_token" :user="user" :need_update_conversations_list="need_update_conversations_list" @selectedConversationChanged="onSelectedConversationChanged" @conversationsListUpdated="onConversationsListUpdated"></ConversationsView>
-    <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id" :need_update_conversation="need_update_conversation" @selectedMessageChanged="onSelectedMessageChanged" @conversationUpdated="onConversationUpdated"></ConversationView>
-    <MessageView :session_token="session_token" :user="user" :all_users="all_users" :selected_message_id="selected_message_id" @messageModified="onMessageModified" @messageForwarded="onMessageSent"></MessageView>
+    <ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>
+    <OtherUserView :session_token="session_token" :user="user" :all_users="all_users" :my_groups="my_groups" @usersUpdated="onNeedUpdateAllUsersList" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent" @reloginNeeded="onReloginNeeded"></OtherUserView>
+    <GroupManagementView :session_token="session_token" :my_groups="my_groups" @groupsUpdated="onNeedUpdateMyGroupsList" @reloginNeeded="onReloginNeeded"></GroupManagementView>
+    <ConversationsView :session_token="session_token" :user="user" :need_update_conversations_list="need_update_conversations_list" @selectedConversationChanged="onSelectedConversationChanged" @conversationsListUpdated="onConversationsListUpdated" @reloginNeeded="onReloginNeeded"></ConversationsView>
+    <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id" :need_update_conversation="need_update_conversation" @selectedMessageChanged="onSelectedMessageChanged" @conversationUpdated="onConversationUpdated" @reloginNeeded="onReloginNeeded"></ConversationView>
+    <MessageView :session_token="session_token" :user="user" :all_users="all_users" :selected_message_id="selected_message_id" @messageModified="onMessageModified" @messageForwarded="onMessageSent" @reloginNeeded="onReloginNeeded"></MessageView>
 </template>

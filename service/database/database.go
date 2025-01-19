@@ -67,6 +67,7 @@ type AppDatabase interface {
 	IsUserInConversation(user_id int, conversation_id int) (bool, error)
 	GetConversationId(user_id1 int, user_id2 int) (int, error)
 	CreateConversation(conversation_id int, user_id1 int, user_id2 int) error
+	AddUserToConversation(conversation_id int, user_id int) error
 	SendMessage(conversation_id int, from_user_id int, message string, forwarded_from_msg_id int) error
 	DeleteMessage(msg_id int) (sql.Result, error)
 	CommentMessage(msg_id int, from_user_id int, reaction string) (int, error)

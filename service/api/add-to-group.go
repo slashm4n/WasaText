@@ -75,7 +75,16 @@ func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprou
 			return
 		}
 		rt.baseLogger.Info("the group `", req.Group_name, "` does not exist so a new one has been created with id "+fmt.Sprint(req.Group_id)+" and conversation id ", fmt.Sprint(req.Conversation_id))
+	} else {
+		// Add user to existing group, that is its conversation
+		err = rt.db.AddUserToConversation(req.Conversation_id, req.User_id_to_add)
+		if err != nil {
+			rt.baseLogger.Error("error while adding user to group (", err.Error()+")")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
+
 	w.WriteHeader(http.StatusCreated)
 
 	// Exit

@@ -4,7 +4,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-    emits: ['messageSent', 'allUsersListUpdated', 'usersUpdated'],
+    emits: ['messageSent', 'allUsersListUpdated', 'usersUpdated', 'reloginNeeded'],
 	props: ['session_token', 'user', 'all_users', 'my_groups'],
 	data: function() {
 		return {
@@ -177,9 +177,13 @@ export default {
 	},
     beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
-            localStorage.setItem('for_user_name_or_group_name',  JSON.stringify(this.for_user_name_or_group_name));
-            localStorage.setItem('message',  JSON.stringify(this.message));
-            localStorage.setItem('group_name',  JSON.stringify(this.group_name));
+            try {
+                localStorage.setItem('for_user_name_or_group_name',  JSON.stringify(this.for_user_name_or_group_name));
+                localStorage.setItem('message',  JSON.stringify(this.message));
+                localStorage.setItem('group_name',  JSON.stringify(this.group_name));
+            } catch {
+                this.$emit('reloginNeeded');
+            }
         });
 
         try {
@@ -187,6 +191,7 @@ export default {
             if (localStorage.getItem('message') != null) this.message = JSON.parse(localStorage.getItem('message'))
             if (localStorage.getItem('group_name') != null) this.group_name = JSON.parse(localStorage.getItem('group_name'))
         } catch {
+            this.$emit('reloginNeeded');
         }
     }
 }

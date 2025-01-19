@@ -4,7 +4,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-	emits: ['selectedMessageChanged', 'conversationUpdated'],
+	emits: ['selectedMessageChanged', 'conversationUpdated', 'reloginNeeded'],
 	props: ['session_token', 'user', 'selected_conversation_id', 'need_update_conversation'],
 	data: function() {
 		return {
@@ -66,14 +66,20 @@ export default {
 	},
 	beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
-            localStorage.setItem('messages',  JSON.stringify(this.messages));
-            localStorage.setItem('selected_message_id', JSON.stringify(this.selected_message_id));
+			try {
+				// non salva i messaggi perché sarebbe troppo pesante, occorre riaprire la conversazione
+            	// localStorage.setItem('messages',  JSON.stringify(this.messages));
+            	localStorage.setItem('selected_message_id', JSON.stringify(this.selected_message_id));
+			} catch {
+				this.$emit('reloginNeeded');
+			}
         });
 
         try {
-            if (localStorage.getItem('messages') != null) this.messages = JSON.parse(localStorage.getItem('messages'));
+            // if (localStorage.getItem('messages') != null) this.messages = JSON.parse(localStorage.getItem('messages'));
             if (localStorage.getItem('selected_message_id') != null) this.selected_message_id = JSON.parse(localStorage.getItem('selected_message_id'));
         } catch {
+			this.$emit('reloginNeeded');
         }
     }
 }

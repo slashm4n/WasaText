@@ -4,7 +4,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-    emits: ['groupsUpdated'],
+    emits: ['groupsUpdated', 'reloginNeeded'],
 	props: ['session_token', 'my_groups'],
 	data: function() {
 		return {
@@ -137,15 +137,20 @@ export default {
     },
     beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
-            localStorage.setItem('selected_group',  JSON.stringify(this.selected_group));
-            localStorage.setItem('new_group_name', JSON.stringify(this.new_group_name));
+            try {
+                localStorage.setItem('selected_group',  JSON.stringify(this.selected_group));
+                localStorage.setItem('new_group_name', JSON.stringify(this.new_group_name));
+            } catch {
+				this.$emit('reloginNeeded');
+			}
         });
 
         try {
             if (localStorage.getItem('selected_group') != null) this.selected_group = JSON.parse(localStorage.getItem('selected_group'));
             if (localStorage.getItem('new_group_name') != null) this.new_group_name = JSON.parse(localStorage.getItem('new_group_name'));
         } catch {
-        }
+        	this.$emit('reloginNeeded');
+		}
     }
 }
 </script>

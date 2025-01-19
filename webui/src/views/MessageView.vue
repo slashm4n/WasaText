@@ -5,7 +5,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-	emits: ['messageModified', 'messageForwarded'],
+	emits: ['messageModified', 'messageForwarded', 'reloginNeeded'],
     props: ['session_token', 'user', 'all_users', 'selected_message_id'],
     data: function() {
 		return {
@@ -140,13 +140,18 @@ export default {
 	},
 	beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
-            localStorage.setItem('to_user_name_or_group_name',  JSON.stringify(this.to_user_name_or_group_name));
+			try {
+            	localStorage.setItem('to_user_name_or_group_name',  JSON.stringify(this.to_user_name_or_group_name));
+			} catch {
+        		this.$emit('reloginNeeded');
+			}
         });
 
         try {
             if (localStorage.getItem('to_user_name_or_group_name') != null) this.to_user_name_or_group_name = JSON.parse(localStorage.getItem('to_user_name_or_group_name'));
         } catch {
-        }
+        	this.$emit('reloginNeeded');
+		}
     }
 }
 </script>
