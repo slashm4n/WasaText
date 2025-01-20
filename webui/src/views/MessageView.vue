@@ -177,6 +177,6 @@ export default {
 				<button @click="doForwardMessage">Send</button>
 			</div>
 		</div>
-		<ErrorMsg :errormsg="errormsg" @error-dismissed="onErrorDismissed"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>
 	</div>
 </template>

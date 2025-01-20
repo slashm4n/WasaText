@@ -71,7 +71,7 @@ export default {
 	beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
 			try {
-         	    localStorage.setItem('conversations',  JSON.stringify(this.conversations));
+         	    // localStorage.setItem('conversations',  JSON.stringify(this.conversations));
 	            localStorage.setItem('selected_conversation_id', JSON.stringify(this.selected_conversation_id));
 			} catch {
 				this.$emit('reloginNeeded');
@@ -79,12 +79,15 @@ export default {
         });
 
         try {
-            if (localStorage.getItem('conversations') != null) this.conversations = JSON.parse(localStorage.getItem('conversations'));
+            // if (localStorage.getItem('conversations') != null) this.conversations = JSON.parse(localStorage.getItem('conversations'));
             if (localStorage.getItem('selected_conversation_id') != null) this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'));
         } catch {
 			this.$emit('reloginNeeded');
         }
-    },	
+    },
+	mounted: function () {
+		this.doUpdateConversationsList();
+	}
 }
 </script>
 
@@ -98,6 +101,6 @@ export default {
 				<span class="snippet-box">{{ c.last_timestamp }} {{ c.last_msg.substring(0, 11) == "data:image/" ? "&#x1F4F7;" : c.last_msg.substring(0, 8) }}</span>
 			</div>
 		</div>
-		<ErrorMsg :errormsg="errormsg" @error-dismissed="onErrorDismissed"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>
 	</div>
 </template>

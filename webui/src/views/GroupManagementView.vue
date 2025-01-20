@@ -173,6 +173,6 @@ export default {
                 <button @click="doLeaveGroup">Leave group</button>
             </div>
         </div>
-		<ErrorMsg :errormsg="errormsg" @error-dismissed="onErrorDismissed"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>
     </div>
 </template>

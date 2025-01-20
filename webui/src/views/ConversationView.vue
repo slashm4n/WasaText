@@ -84,7 +84,10 @@ export default {
         } catch {
 			this.$emit('reloginNeeded');
         }
-    }
+    },
+	mounted: function () {
+		this.doLoadConversation();
+	}
 }
 </script>
 
@@ -97,6 +100,6 @@ export default {
 				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span v-if="msg.from_user_id==user.id" style="font-size: smaller;">{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
 			</div>
 		</div>
-		<ErrorMsg :errormsg="errormsg" @error-dismissed="onErrorDismissed"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>
 	</div>
 </template>
