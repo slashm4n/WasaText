@@ -126,6 +126,41 @@ export default {
                     this.errormsg = "Error: " + e;
             }
         },
+        async doShowMembers() {
+            try {
+                if (this.selected_group == null) {
+                    this.errormsg = "Group not set";
+                    return;
+                }
+
+                // this.errormsg = "Not implemented";
+
+                const res = await this.$axios({
+                    method: 'get',
+                    url: '/groups/' + this.selected_group.group_id,
+                    headers: {
+                        'Authorization' : 'Bearer ' + this.session_token
+                    },
+                });
+
+                if (res.status != 200) {
+                    this.errormsg = "Problem while retriving members of the group";
+                }
+                
+                let membersList = '';
+                for (var i = 0; i < res.data.length; i++) {
+                    membersList += res.data[i]['user_name'] + '\n';
+                }
+                alert(membersList)
+
+                this.errormsg = "";
+            } catch (e) {
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
+            }
+        },
 		async onErrorDismissed() {
 			this.errormsg = '';
 		}
@@ -171,6 +206,7 @@ export default {
                 <label for="photoGroupUploader" class="label-button">Set photo</label>
                 <input id="photoGroupUploader" type="file" accept="image/*" hidden="true" ref="photoGroupUploader" @click="onPhotoGroupUploaderClick" @change="doSetGroupPhoto">
                 <button @click="doLeaveGroup">Leave group</button>
+                <button @click="doShowMembers">Show members</button>
             </div>
         </div>
 		<ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>

@@ -79,6 +79,7 @@ type AppDatabase interface {
 	SetGroupName(group_id int, group_name string) error
 	SetGroupPhoto(group_id int, photo string) error
 	LeaveGroup(user_id int, group_id int) error
+	GetMembers(group_id int) ([]User, error)
 }
 
 type appdbimpl struct {

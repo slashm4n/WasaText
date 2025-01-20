@@ -342,6 +342,19 @@ paths:
         schema:
           type: integer
           description: Group id
+    get:
+      tags:
+        - Group
+      description: |-
+        Return the list of all members of the group
+      operationId: getAllMembers
+      summary: Get the list of members of the group
+      responses:
+        "200":
+          description: List of members
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Group" }
     put:
       tags:
         - Group
@@ -377,6 +390,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Group" }
+
     delete:
       tags:
         - Group

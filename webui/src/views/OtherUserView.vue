@@ -4,7 +4,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-    emits: ['messageSent', 'allUsersListUpdated', 'usersUpdated', 'reloginNeeded'],
+    emits: ['messageSent', 'allUsersListUpdated', 'usersUpdated', 'reloginNeeded', 'groupsUpdated'],
 	props: ['session_token', 'user', 'all_users', 'my_groups'],
 	data: function() {
 		return {
@@ -153,6 +153,7 @@ export default {
                 }
 
                 this.$emit('myConversationsUpdated');
+                this.$emit('groupsUpdated');
 
                 this.user_name_to_add = ''
                 this.group_name = '';

@@ -23,7 +23,7 @@ export default {
             selected_message_id : 0,
             need_update_conversations_list : false,
             need_update_conversation : false,
-            need_update_all_users_list : false,
+            // need_update_all_users_list : false,
             need_update_groups_list : false
 		}
 	},
@@ -56,13 +56,13 @@ export default {
                     console.log("Login done successfully. User already existing. Session token ", this.session_token);
 
                     // also if the user exist, the all users list need to be updated soon after login
-                    this.need_update_all_users_list = true;
+                    // this.need_update_all_users_list = true;
                 }
                 else if (res.status == 201) {
                     console.log("Login done successfully. New user created. Session token ", this.session_token);
 
                     // need refresh the all users list!
-                    this.need_update_all_users_list = true;
+                    // this.need_update_all_users_list = true;
                 }
                 else {
                     this.errormsg = "Response code" + res.statusText + " diverso da quello atteso";
@@ -109,7 +109,7 @@ export default {
             this.selected_message_id = 0;
             this.need_update_conversations_list = false;
             this.need_update_conversation = false;
-            this.need_update_all_users_list = false;
+            // this.need_update_all_users_list = false;
             this.need_update_groups_list = false;
         },
 
@@ -136,7 +136,7 @@ export default {
                 this.errormsg = "";
 
                 // need refresh the all users list!
-                this.need_update_all_users_list = true;
+                // this.need_update_all_users_list = true;
             } catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -275,6 +275,8 @@ export default {
         async onNeedUpdateMyGroupsList() {
             this.doUpdateMyGroupsList();
             this.need_update_conversations_list = true;
+            this.doUpdateAllUsersList();
+            // this.need_update_all_users_list = true;
         },
 
         async doSetMyPhoto(e) {
@@ -318,7 +320,7 @@ export default {
         },
 
         async onAllUsersListUpdated() {
-            this.need_update_all_users_list = false;
+            this.doUpdateAllUsersList();
         },
 
         async onPhotoUploaderClick() {
@@ -356,7 +358,7 @@ export default {
             localStorage.setItem('selected_message_id', JSON.stringify(this.selected_message_id));
             localStorage.setItem('need_update_conversations_list', JSON.stringify(this.need_update_conversations_list));
             localStorage.setItem('need_update_conversation', JSON.stringify(this.need_update_conversation));
-            localStorage.setItem('need_update_all_users_list', JSON.stringify(this.need_update_all_users_list));
+            // localStorage.setItem('need_update_all_users_list', JSON.stringify(this.need_update_all_users_list));
         });
 
         // retrieve the state
@@ -370,7 +372,7 @@ export default {
             if (localStorage.getItem('selected_conversation_id') != null) this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'));
             if (localStorage.getItem('need_update_conversations_list') != null) this.need_update_conversations_list = JSON.parse(localStorage.getItem('need_update_conversations_list'));
             if (localStorage.getItem('need_update_conversation') != null) this.need_update_conversation = JSON.parse(localStorage.getItem('need_update_conversation'));
-            if (localStorage.getItem('need_update_all_users_list') != null) this.need_update_all_users_list = JSON.parse(localStorage.getItem('need_update_all_users_list'));
+            // if (localStorage.getItem('need_update_all_users_list') != null) this.need_update_all_users_list = JSON.parse(localStorage.getItem('need_update_all_users_list'));
         } catch {
             this.session_token = 0
         }
@@ -397,7 +399,7 @@ export default {
     </div>
     
     <ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>
-    <OtherUserView :session_token="session_token" :user="user" :all_users="all_users" :my_groups="my_groups" @usersUpdated="onNeedUpdateAllUsersList" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent" @reloginNeeded="onReloginNeeded"></OtherUserView>
+    <OtherUserView :session_token="session_token" :user="user" :all_users="all_users" :my_groups="my_groups" @usersUpdated="onNeedUpdateAllUsersList" @allUsersListUpdated="onAllUsersListUpdated" @messageSent="onMessageSent" @reloginNeeded="onReloginNeeded" @groupsUpdated="onNeedUpdateMyGroupsList"></OtherUserView>
     <GroupManagementView :session_token="session_token" :my_groups="my_groups" @groupsUpdated="onNeedUpdateMyGroupsList" @reloginNeeded="onReloginNeeded"></GroupManagementView>
     <ConversationsView :session_token="session_token" :user="user" :need_update_conversations_list="need_update_conversations_list" @selectedConversationChanged="onSelectedConversationChanged" @conversationsListUpdated="onConversationsListUpdated" @reloginNeeded="onReloginNeeded"></ConversationsView>
     <ConversationView :session_token="session_token" :user="user" :selected_conversation_id="selected_conversation_id" :need_update_conversation="need_update_conversation" @selectedMessageChanged="onSelectedMessageChanged" @conversationUpdated="onConversationUpdated" @reloginNeeded="onReloginNeeded"></ConversationView>
