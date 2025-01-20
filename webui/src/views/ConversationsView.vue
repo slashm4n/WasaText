@@ -47,6 +47,9 @@ export default {
 		},
 		async onConversationFocusOut() {
 			this.selected_conversation_id = 0;
+		},
+		async onErrorDismissed() {
+			this.errormsg = '';
 		}
   	},
   	watch: {
@@ -95,6 +98,6 @@ export default {
 				<span class="snippet-box">{{ c.last_timestamp }} {{ c.last_msg.substring(0, 11) == "data:image/" ? "&#x1F4F7;" : c.last_msg.substring(0, 8) }}</span>
 			</div>
 		</div>
-		<ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @error-dismissed="onErrorDismissed"></ErrorMsg>
 	</div>
 </template>

@@ -46,6 +46,9 @@ export default {
 		async onMessageClick(msg) {
 			this.selected_message_id = msg.msg_id;
 			this.$emit('selectedMessageChanged', this.selected_message_id);
+		},
+		async onErrorDismissed() {
+			this.errormsg = '';
 		}
 	},
 	watch: {
@@ -94,6 +97,6 @@ export default {
 				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span v-if="msg.from_user_id==user.id" style="font-size: smaller;">{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
 			</div>
 		</div>
-		<ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @error-dismissed="onErrorDismissed"></ErrorMsg>
 	</div>
 </template>

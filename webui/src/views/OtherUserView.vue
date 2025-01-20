@@ -163,7 +163,10 @@ export default {
                 else
                     this.errormsg = "Error: " + e;
             }
-        }
+        },
+		async onErrorDismissed() {
+			this.errormsg = '';
+		}
 	},
     watch: {
     	session_token(newValue, oldValue) {
@@ -219,6 +222,6 @@ export default {
                 <button @click="doAddToGroup">Apply</button>
             </div>
         </div>
-        <ErrorMsg :errormsg="errormsg" @error-dismissed="this.errormsg = '';"></ErrorMsg>
+		<ErrorMsg :errormsg="errormsg" @error-dismissed="onErrorDismissed"></ErrorMsg>
     </div>
 </template>
