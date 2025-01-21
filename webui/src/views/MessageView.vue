@@ -282,6 +282,8 @@ export default {
 			</span>
 			<span v-if="selected_message != null && selected_message.from_user_id==user.id">
 				<button @click="onDeleteMessage">Delete msg</button>
+			</span>
+			<span>
 				<span class="label-flat">Forward to</span>
 				<select id="userOrGroupForForwardMsgSelect" style="position:relative; height: 1.3em; width: 11em;" v-model="user_or_group_for_forward_msg" :selected="0">
 					<option style="color:gray" disabled="true" :key="0" :value="null">select user or group</option>
