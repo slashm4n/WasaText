@@ -99,19 +99,19 @@ export default {
 				<p v-if=!msg.is_photo>
 					<span style="font-style: italic;">{{ msg.from_user_name }}</span>
 					<span>{{ msg.msg }}</span>
-					<div style="position:relative; font-size: smaller;">
+					<span style="position:relative; font-size: smaller;">
 						<span v-if="msg.from_user_id==user.id">{{ msg.sent_timestamp }}&nbsp;{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span>
 						<span v-if="msg.from_user_id!=user.id">{{ msg.sent_timestamp }}</span>
-					</div>
+					</span>
 					<span style="font-size: medium">{{ msg.reaction }}</span>
 				</p>
 				<p v-if=msg.is_photo>
 					<span style="font-style: italic;">{{ msg.from_user_name }}</span>
 					<img class="photo-box-big" v-bind:src=msg.msg>
-					<div style="position:relative; font-size: smaller;">
+					<span style="position:relative; font-size: smaller;">
 						<span v-if="msg.from_user_id==user.id">{{ msg.sent_timestamp }}&nbsp;{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span>
 						<span v-if="msg.from_user_id!=user.id">{{ msg.sent_timestamp }}</span>
-					</div>
+					</span>
 					<span style="font-size: medium">{{ msg.reaction }}</span>
 				</p>
 			</div>
