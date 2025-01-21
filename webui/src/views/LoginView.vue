@@ -23,7 +23,7 @@ export default {
             my_groups: null,
             selected_conversation : null,
             selected_conversation_id : 0,
-            selected_message_id : 0,
+            selected_message : null,
             need_update_conversations_list : false,
             need_update_conversation : false,
             // need_update_all_users_list : false,
@@ -109,7 +109,7 @@ export default {
             this.all_users_and_my_groups = null;
             this.my_groups = null;
             this.selected_conversation = null;
-            this.selected_message_id = 0;
+            this.selected_message = null;
             this.need_update_conversations_list = false;
             this.need_update_conversation = false;
             // this.need_update_all_users_list = false;
@@ -306,15 +306,15 @@ export default {
         async onSelectedConversationChanged(selected_conversation) {
             this.selected_conversation = selected_conversation;
             // must reset the selected message!
-            this.selected_message_id = 0;
+            this.selected_message = null;
         },
         
         async onConversationsListUpdated() {
             this.need_update_conversations_list = false;
         },
         
-        async onSelectedMessageChanged(selected_message_id) {
-            this.selected_message_id = selected_message_id;
+        async onSelectedMessageChanged(selected_message) {
+            this.selected_message = selected_message;
         },
         
         async onConversationUpdated() {
@@ -364,7 +364,7 @@ export default {
         localStorage.removeItem('all_users_and_my_groups');
         localStorage.removeItem('my_groups');
         localStorage.removeItem('selected_conversation');
-        localStorage.removeItem('selected_message_id');
+        localStorage.removeItem('selected_message');
         localStorage.removeItem('need_update_conversations_list');
         localStorage.removeItem('need_update_conversation');
         */
@@ -378,7 +378,7 @@ export default {
             localStorage.setItem('all_users_and_my_groups', JSON.stringify(this.all_users_and_my_groups));
             localStorage.setItem('my_groups', JSON.stringify(this.my_groups));
             localStorage.setItem('selected_conversation_id', JSON.stringify(this.selected_conversation_id));
-            localStorage.setItem('selected_message_id', JSON.stringify(this.selected_message_id));
+            localStorage.setItem('selected_message', JSON.stringify(this.selected_message));
             localStorage.setItem('need_update_conversations_list', JSON.stringify(this.need_update_conversations_list));
             localStorage.setItem('need_update_conversation', JSON.stringify(this.need_update_conversation));
             // localStorage.setItem('need_update_all_users_list', JSON.stringify(this.need_update_all_users_list));
@@ -426,5 +426,5 @@ export default {
     <NewConversationView :session_token="session_token" :user="user" :all_users="all_users" @messageSent="onMessageSent"  ></NewConversationView>
     <ConversationsView :session_token="session_token" :user="user" :need_update_conversations_list="need_update_conversations_list" @selectedConversationChanged="onSelectedConversationChanged" @conversationsListUpdated="onConversationsListUpdated" @reloginNeeded="onReloginNeeded"></ConversationsView>
     <ConversationView :session_token="session_token" :user="user" :selected_conversation="selected_conversation" :need_update_conversation="need_update_conversation" @selectedMessageChanged="onSelectedMessageChanged" @conversationUpdated="onConversationUpdated" @reloginNeeded="onReloginNeeded"></ConversationView>
-    <MessageView :session_token="session_token" :user="user" :all_users_and_my_groups="all_users_and_my_groups" :selected_message_id="selected_message_id" :selected_conversation="selected_conversation" @messageSent="onMessageSent" @messageModified="onMessageModified" @messageForwarded="onMessageSent" @reloginNeeded="onReloginNeeded"></MessageView>
+    <MessageView :session_token="session_token" :user="user" :all_users_and_my_groups="all_users_and_my_groups" :selected_message="selected_message" :selected_conversation="selected_conversation" @messageSent="onMessageSent" @messageModified="onMessageModified" @messageForwarded="onMessageSent" @reloginNeeded="onReloginNeeded"></MessageView>
 </template>

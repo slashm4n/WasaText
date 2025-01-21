@@ -177,6 +177,11 @@ export default {
         },
 		
         async doSetGroupPhoto(e) {
+            if (this.group_to_set == null) {
+                this.errormsg = "Group name not set";
+                return;
+            }
+
             const img = e.target.files[0];
             const reader = new FileReader();
             reader.readAsDataURL(img);
@@ -315,10 +320,8 @@ export default {
                     <option v-for="u in all_users" :key="u.group_id" :value="u">{{ u.user_name }}</option>
                 </select>
                 <button @click="doCreateGroup">Apply</button>
-                
                 <br></br>
                 <p style="border-bottom: 1em;"></p>
-
                 <span class="label-flat">Add to group</span>
                 <select id="groupNameToGrowthSelect" style="position:relative; width: 9em;" v-model="group_to_growth" :selected="0">
                     <option style="color:gray" disabled="true" :key="0" :value="null">select group</option>

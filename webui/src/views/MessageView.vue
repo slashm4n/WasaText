@@ -6,7 +6,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 <script>
 export default {
 	emits: ['messageSent', 'messageModified', 'messageForwarded', 'reloginNeeded'],
-    props: ['session_token', 'user', 'all_users_and_my_groups', 'selected_message_id', 'selected_conversation'],
+    props: ['session_token', 'user', 'all_users_and_my_groups', 'selected_message', 'selected_conversation'],
     data: function() {
 		return {
 			errormsg: '',
@@ -21,11 +21,6 @@ export default {
 				return;
 			}
             try {
-                /* if (this.user_or_group_for_send_msg == null) {
-                    this.errormsg = "Receiver of message not set";
-                    return;
-                }*/
-
                 if (this.message == '') {
                     this.errormsg = "Message not set";
                     return;
@@ -116,7 +111,7 @@ export default {
         },
 
 		async doForwardMessage() {
-            if (this.selected_message_id == 0) {
+            if (this.selected_message == null) {
 				return;
 			}
 			if (this.user_or_group_for_forward_msg == null) {
@@ -127,7 +122,7 @@ export default {
 			try {
 				const response = await this.$axios({
 					method: 'post',
-					url: '/messages/' + this.selected_message_id,
+					url: '/messages/' + this.selected_message.msg_id,
 					headers: {
 						'Authorization' : 'Bearer ' + this.session_token
 					},
@@ -148,13 +143,13 @@ export default {
 			}
 		},
         async onDeleteMessage() {
-            if (this.selected_message_id == 0) {
+            if (this.selected_message == null) {
 				return;
 			}
 			try {
 				const response = await this.$axios({
 					method: 'delete',
-					url: '/messages/' + this.selected_message_id,
+					url: '/messages/' + this.selected_message.msg_id,
 					headers: {
 						'Authorization' : 'Bearer ' + this.session_token
 					}
@@ -170,13 +165,13 @@ export default {
 			}
         },
 		async onDeleteReaction() {
-            if (this.selected_message_id == 0) {
+            if (this.selected_message == null) {
 				return;
 			}
 			try {
 				const response = await this.$axios({
 					method: 'delete',
-					url: '/messages/:' + this.selected_message_id + '/comments',
+					url: '/messages/:' + this.selected_message.msg_id + '/comments',
 					headers: {
 						'Authorization' : 'Bearer ' + this.session_token
 					}
@@ -192,7 +187,7 @@ export default {
 			}
 		},
 		async onReactionClick(el) {
-			if (this.selected_message_id == 0) {
+			if (this.selected_message == null) {
 				return;
 			}
 
@@ -207,7 +202,7 @@ export default {
 						'Authorization' : 'Bearer ' + this.session_token
 					},
                     data: {
-                        "msg_id": this.selected_message_id,
+                        "msg_id": this.selected_message.msg_id,
                         "reaction": el.target.value
                     }
 				});
@@ -237,9 +232,7 @@ export default {
 				this.user_or_group_for_send_msg = null;
 				this.user_or_group_for_forward_msg = null;
 			}
-		},
-        selected_message_id(newValue, oldValue) {
-        }
+		}
 	},
 	beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
@@ -269,21 +262,14 @@ export default {
 	<div v-if="session_token != 0">
 		<div class="message-container">
 			<div v-if="selected_conversation != null" style="position: relative; top: 0.7em;">
-				<!--span class="label-flat">Send to</span-->
-                <!--select id="userOrGroupToSendMsgSelect" style="position:relative; height: 1.3em; width: 10em;" v-model="user_or_group_for_send_msg" :selected="0">
-					<option style="color:gray" disabled="true" :key="0" :value="null">select user or group</option>
-					<option v-for="u in all_users_and_my_groups" :key="(u.is_group ? 'G' : 'U') + u.user_id_or_group_id" :value="u">{{ u.is_group ? u.group_name + " (G)" : u.user_name }}</option>
-                </select-->
-                <input id="messageInput" v-model="message" placeholder="Message">
+				<input id="messageInput" v-model="message" placeholder="Message" style="width: 12em;">
                 <button @click="doSendMessage">Send</button>
                 <span class="label-flat">or</span>
                 <label for="photoSender" class="label-button">Send photo</label>
 				<input id="photoSender" ref="photoSender" type="file" accept="image/*" hidden="true" @click="onImageUploaderClick" @change="doSendPhoto">
 			</div>
-
 			<br></br>
-			
-			<span v-if="selected_message_id != 0" style="position: relative; top:0.5em">
+			<span v-if="selected_message != null && selected_message.from_user_id!=user.id" style="position: relative; top:0.5em">
 				<span>&nbsp;&nbsp;&nbsp;</span>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F600;">&#x1F600;</button>
 				<span>&nbsp;</span>
@@ -293,9 +279,11 @@ export default {
 				<span>&nbsp;</span>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F44D;">&#x1F44D;</button>
 				<button @click="onDeleteReaction">Uncomment</button>
+			</span>
+			<span v-if="selected_message != null && selected_message.from_user_id==user.id">
 				<button @click="onDeleteMessage">Delete msg</button>
 				<span class="label-flat">Forward to</span>
-				<select id="userOrGroupForForwardMsgSelect" style="position:relative; height: 1.3em; width: 9.5em;" v-model="user_or_group_for_forward_msg" :selected="0">
+				<select id="userOrGroupForForwardMsgSelect" style="position:relative; height: 1.3em; width: 11em;" v-model="user_or_group_for_forward_msg" :selected="0">
 					<option style="color:gray" disabled="true" :key="0" :value="null">select user or group</option>
 					<option v-for="u in all_users_and_my_groups" :key="(u.is_group ? 'G' : 'U') + u.user_id_or_group_id" :value="u">{{ u.is_group ? u.group_name + " (G)" : u.user_name }}</option>
 				</select>

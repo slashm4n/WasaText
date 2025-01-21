@@ -45,7 +45,7 @@ export default {
 		},
 		async onMessageClick(msg) {
 			this.selected_message_id = msg.msg_id;
-			this.$emit('selectedMessageChanged', this.selected_message_id);
+			this.$emit('selectedMessageChanged', msg);
 		},
 		async onErrorDismissed() {
 			this.errormsg = '';
