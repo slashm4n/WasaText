@@ -29,6 +29,7 @@ type Message struct {
 	Forwarded_from_msg_id int    `json:"forwarded_from_msg_id"`
 	Conversation_id       int    `json:"conversation_id"`
 	From_user_id          int    `json:"from_user_id"`
+	From_user_name        string `json:"from_user_name"`
 	Sent_timestamp        string `json:"sent_timestamp"`
 	Msg                   string `json:"msg"`
 	Is_photo              bool   `json:"is_photo"`
@@ -38,6 +39,7 @@ type Message struct {
 
 type Conversation struct {
 	Conversation_id     int    `json:"conversation_id"`
+	User_or_group_id    int    `json:"user_or_group_id"`
 	User_or_group_name  string `json:"user_or_group_name"`
 	User_or_group_photo string `json:"user_or_group_photo"`
 	Is_group            int    `json:"is_group"`

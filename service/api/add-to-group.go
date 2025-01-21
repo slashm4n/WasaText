@@ -79,12 +79,12 @@ func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprou
 		// Add user to existing group, that is its conversation
 		err = rt.db.AddUserToConversation(req.Conversation_id, req.User_id_to_add)
 		if err != nil {
-			rt.baseLogger.Error("error while adding user to group (", err.Error()+")")
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			_ = json.NewEncoder(w).Encode("l'utente è stato già aggiunto al gruppo")
+			// rt.baseLogger.Error("error while adding user to group (", err.Error()+")")
+			// w.WriteHeader(http.StatusInternalServerError)
+			// return
 		}
 	}
-
 	w.WriteHeader(http.StatusCreated)
 
 	// Exit

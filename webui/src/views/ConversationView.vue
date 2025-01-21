@@ -5,7 +5,7 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 <script>
 export default {
 	emits: ['selectedMessageChanged', 'conversationUpdated', 'reloginNeeded'],
-	props: ['session_token', 'user', 'selected_conversation_id', 'need_update_conversation'],
+	props: ['session_token', 'user', 'selected_conversation', 'need_update_conversation'],
 	data: function() {
 		return {
 			errormsg: '',
@@ -16,13 +16,13 @@ export default {
 	methods: {
 		async doLoadConversation() {
 			try {
-				if (this.selected_conversation_id == 0)
+				if (this.selected_conversation == null)
 				{
 					this.messages = [];
 				} else {
 					const response = await this.$axios({
 						method: 'get',
-						url: '/conversations/' + this.selected_conversation_id,
+						url: '/conversations/' + this.selected_conversation.conversation_id,
 						headers: {
 							'Authorization' : 'Bearer ' + this.session_token
 						}
@@ -59,7 +59,7 @@ export default {
 				this.selected_message_id = 0;
 			}
 		},
-    	selected_conversation_id(newValue, oldValue) {
+    	selected_conversation(newValue, oldValue) {
       		this.doLoadConversation();
 		},
     	need_update_conversation(newValue, oldValue) {
@@ -93,11 +93,27 @@ export default {
 
 <template>
 	<div v-if="session_token != 0">
-		<div ref="convview" v-if="session_token != 0 && user != null && selected_conversation_id != 0" class="conversation-container">
+		<div ref="convview" v-if="session_token != 0 && user != null && selected_conversation != null" class="conversation-container">
 			<div :class="{'message-box friend-message':msg.from_user_id!=user.id,'message-box my-message':msg.from_user_id==user.id}"
 				v-for="(msg, index) in messages" :key="msg.id" :tabindex="index" @click="onMessageClick(msg)">
-				<p v-if=!msg.is_photo>{{ msg.msg }}<span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span v-if="msg.from_user_id==user.id" style="font-size: smaller;">{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
-				<p v-if=msg.is_photo><img class="photo-box-big" v-bind:src=msg.msg><span style="font-size: smaller;">{{ msg.sent_timestamp }}</span><span v-if="msg.from_user_id==user.id" style="font-size: smaller;">{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span><span style="font-size: medium">{{ msg.reaction }}</span></p>
+				<p v-if=!msg.is_photo>
+					<span style="font-style: italic;">{{ msg.from_user_name }}</span>
+					<span>{{ msg.msg }}</span>
+					<div style="position:relative; font-size: smaller;">
+						<span v-if="msg.from_user_id==user.id">{{ msg.sent_timestamp }}&nbsp;{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span>
+						<span v-if="msg.from_user_id!=user.id">{{ msg.sent_timestamp }}</span>
+					</div>
+					<span style="font-size: medium">{{ msg.reaction }}</span>
+				</p>
+				<p v-if=msg.is_photo>
+					<span style="font-style: italic;">{{ msg.from_user_name }}</span>
+					<img class="photo-box-big" v-bind:src=msg.msg>
+					<div style="position:relative; font-size: smaller;">
+						<span v-if="msg.from_user_id==user.id">{{ msg.sent_timestamp }}&nbsp;{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span>
+						<span v-if="msg.from_user_id!=user.id">{{ msg.sent_timestamp }}</span>
+					</div>
+					<span style="font-size: medium">{{ msg.reaction }}</span>
+				</p>
 			</div>
 		</div>
 		<ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>

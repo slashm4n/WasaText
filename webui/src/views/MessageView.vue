@@ -5,26 +5,124 @@ import ErrorMsg from '../components/ErrorMsg.vue';
 
 <script>
 export default {
-	emits: ['messageModified', 'messageForwarded', 'reloginNeeded'],
-    props: ['session_token', 'user', 'all_users', 'selected_message_id'],
+	emits: ['messageSent', 'messageModified', 'messageForwarded', 'reloginNeeded'],
+    props: ['session_token', 'user', 'all_users_and_my_groups', 'selected_message_id', 'selected_conversation'],
     data: function() {
 		return {
 			errormsg: '',
-			to_user_name_or_group_name: ''
+			user_or_group_for_send_msg: null,
+			user_or_group_for_forward_msg: null,
+			message: ''
 		}
 	},
 	methods: {
+		async doSendMessage() {
+			if (this.selected_conversation == null) {
+				return;
+			}
+            try {
+                /* if (this.user_or_group_for_send_msg == null) {
+                    this.errormsg = "Receiver of message not set";
+                    return;
+                }*/
+
+                if (this.message == '') {
+                    this.errormsg = "Message not set";
+                    return;
+                }
+                
+                const res = await this.$axios({
+                    method: 'post',
+                    url: '/messages',
+                    headers: {
+                        'Authorization' : 'Bearer ' + this.session_token
+                    },
+                    data: {
+                        "to_user_name_or_group_name": this.selected_conversation.user_or_group_name,
+                        "is_group": this.selected_conversation.is_group == 0 ? false : true,
+                        "message": this.message
+                    }
+                });
+
+                if (res.status != 201) {
+                    this.errormsg = "Unexpected response " + res.status;
+                    return;
+                }
+
+                this.$emit('messageSent', this.selected_conversation.user_or_group_name);
+                this.message = '';
+
+                this.errormsg = '';
+            } catch (e) {
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
+            }
+        },
+
+        // this code cannot be placed inside doSetMyPhoto because
+        // await need to be on the top level of an async method
+        async doSendPhotoAsync(img)
+        {
+            try {
+                const res = await this.$axios({
+                    method: 'post',
+                    url: '/messages',
+                    headers: {
+                        'Authorization' : 'Bearer ' + this.session_token
+                    },
+                    data: {
+                        "to_user_name_or_group_name": this.selected_conversation.user_or_group_name,
+                        "is_group": this.selected_conversation.is_group == 0 ? false : true,
+                        "message": img
+                    }
+                });
+
+                if (res.status != 201) {
+                    this.errormsg = "Unexpected response " + res.status;
+                    return;
+                }
+
+                this.$emit('messageSent', this.for_user_name_or_group_name);
+
+                this.errormsg = '';
+            } catch (e) {
+                if (e.response != null && e.response.data != "")
+                    this.errormsg = "Error: " + e.response.data;
+                else
+                    this.errormsg = "Error: " + e;
+            }
+        },
+
+        async doSendPhoto(e) {
+			if (this.selected_conversation == null) {
+				return;
+			}
+
+            const img = e.target.files[0];
+
+            if (img == null)
+                return;
+            const reader = new FileReader();
+            reader.readAsDataURL(img);
+            reader.onload = evn =>{
+                this.doSendPhotoAsync(evn.target.result);
+            }
+        },
+
+        async onImageUploaderClick() {
+            this.$refs.photoSender.value = ''
+        },
+
 		async doForwardMessage() {
             if (this.selected_message_id == 0) {
 				return;
 			}
-			if (this.to_user_name_or_group_name == '') {
+			if (this.user_or_group_for_forward_msg == null) {
 				this.errormsg = "Receiver user not set";
 				return;
 			}
-
-			const is_group = this.to_user_name_or_group_name.substring(this.to_user_name_or_group_name.length - 8) == " (group)";
-			const name = is_group ? this.to_user_name_or_group_name.substring(0, this.to_user_name_or_group_name.length - 8) : this.to_user_name_or_group_name
 
 			try {
 				const response = await this.$axios({
@@ -34,12 +132,13 @@ export default {
 						'Authorization' : 'Bearer ' + this.session_token
 					},
 					data: {
-                        "to_user_name_or_group_name": name,
-                        "is_group": is_group
+                        "to_user_name_or_group_name": this.user_or_group_for_forward_msg.user_name_or_group_name,
+                        "is_group": this.user_or_group_for_forward_msg.is_group
                     }
 				});
 
                 this.$emit('messageForwarded', name);
+
 				this.errormsg = '';
 			} catch (e) {
                 if (e.response != null && e.response.data != "")
@@ -135,7 +234,8 @@ export default {
 		session_token(newValue, oldValue) {
 			if (newValue == 0) {
 				this.errormsg = '';
-				this.to_user_name_or_group_name = '';
+				this.user_or_group_for_send_msg = null;
+				this.user_or_group_for_forward_msg = null;
 			}
 		},
         selected_message_id(newValue, oldValue) {
@@ -144,38 +244,63 @@ export default {
 	beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
 			try {
-            	localStorage.setItem('to_user_name_or_group_name',  JSON.stringify(this.to_user_name_or_group_name));
+            	localStorage.setItem('user_or_group_for_send_msg',  JSON.stringify(this.user_or_group_for_send_msg));
+            	localStorage.setItem('user_or_group_for_forward_msg',  JSON.stringify(this.user_or_group_for_forward_msg));
 			} catch {
         		this.$emit('reloginNeeded');
 			}
         });
 
         try {
-            if (localStorage.getItem('to_user_name_or_group_name') != null) this.to_user_name_or_group_name = JSON.parse(localStorage.getItem('to_user_name_or_group_name'));
+            if (localStorage.getItem('user_or_group_for_send_msg') != null) this.user_or_group_for_send_msg = JSON.parse(localStorage.getItem('user_or_group_for_send_msg'));
+            if (localStorage.getItem('user_or_group_for_forward_msg') != null) this.user_or_group_for_forward_msg = JSON.parse(localStorage.getItem('user_or_group_for_forward_msg'));
         } catch {
         	this.$emit('reloginNeeded');
 		}
-    }
+    },
+	mounted: function() {
+		this.user_or_group_for_send_msg = null;
+		this.user_or_group_for_forward_msg = null;
+	}
 }
 </script>
 
 <template>
 	<div v-if="session_token != 0">
 		<div class="message-container">
-			<div v-if="selected_message_id != 0" style="position: relative; top: 0.7em;">
-				<span style="position: relative; left:1em">.</span>
-				<button class="emoticon-button" @click="onReactionClick" value="&#x1F600;">&#x1F600;</button>
-				<button class="emoticon-button" @click="onReactionClick" value="&#x1F602;">&#x1F602;</button>
-				<button class="emoticon-button" @click="onReactionClick" value="&#x1F621;">&#x1F621;</button>
-				<button class="emoticon-button" @click="onReactionClick" value="&#x1F44D;">&#x1F44D;</button>
-				<button @click="onDeleteReaction">Remove</button>
-				<button @click="onDeleteMessage">Delete message</button>
-				<span class="label-flat">Forward to</span>
-				<select id="userNameInput" style="position:relative; height: 1.3em; width: 9.5em;" v-model="to_user_name_or_group_name" >
-					<option v-for="(u, index) in all_users" :key="index">{{ u.is_group ? u.group_name + " (group)" : u.user_name }}</option>
-				</select>
-				<button @click="doForwardMessage">Send</button>
+			<div v-if="selected_conversation != null" style="position: relative; top: 0.7em;">
+				<!--span class="label-flat">Send to</span-->
+                <!--select id="userOrGroupToSendMsgSelect" style="position:relative; height: 1.3em; width: 10em;" v-model="user_or_group_for_send_msg" :selected="0">
+					<option style="color:gray" disabled="true" :key="0" :value="null">select user or group</option>
+					<option v-for="u in all_users_and_my_groups" :key="(u.is_group ? 'G' : 'U') + u.user_id_or_group_id" :value="u">{{ u.is_group ? u.group_name + " (G)" : u.user_name }}</option>
+                </select-->
+                <input id="messageInput" v-model="message" placeholder="Message">
+                <button @click="doSendMessage">Send</button>
+                <span class="label-flat">or</span>
+                <label for="photoSender" class="label-button">Send photo</label>
+				<input id="photoSender" ref="photoSender" type="file" accept="image/*" hidden="true" @click="onImageUploaderClick" @change="doSendPhoto">
 			</div>
+
+			<br></br>
+			
+			<span v-if="selected_message_id != 0" style="position: relative; top:0.5em">
+				<span>&nbsp;&nbsp;&nbsp;</span>
+				<button class="emoticon-button" @click="onReactionClick" value="&#x1F600;">&#x1F600;</button>
+				<span>&nbsp;</span>
+				<button class="emoticon-button" @click="onReactionClick" value="&#x1F602;">&#x1F602;</button>
+				<span>&nbsp;</span>
+				<button class="emoticon-button" @click="onReactionClick" value="&#x1F621;">&#x1F621;</button>
+				<span>&nbsp;</span>
+				<button class="emoticon-button" @click="onReactionClick" value="&#x1F44D;">&#x1F44D;</button>
+				<button @click="onDeleteReaction">Uncomment</button>
+				<button @click="onDeleteMessage">Delete msg</button>
+				<span class="label-flat">Forward to</span>
+				<select id="userOrGroupForForwardMsgSelect" style="position:relative; height: 1.3em; width: 9.5em;" v-model="user_or_group_for_forward_msg" :selected="0">
+					<option style="color:gray" disabled="true" :key="0" :value="null">select user or group</option>
+					<option v-for="u in all_users_and_my_groups" :key="(u.is_group ? 'G' : 'U') + u.user_id_or_group_id" :value="u">{{ u.is_group ? u.group_name + " (G)" : u.user_name }}</option>
+				</select>
+				<button @click="doForwardMessage">Apply</button>
+			</span>
 		</div>
 		<ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>
 	</div>

@@ -9,16 +9,16 @@ body {
 input {
 	position: relative;
 	font-size: 1em;
-	margin-left: 1em;
+	margin-left: 0.7em;
 	width: 8em;
 }
 
 button {
 	position: relative;
 	height: 1.8em;
-	margin-left: 1em;
-	color: black;
-	background-color: white;
+	margin-left: 0.7em;
+	color: white;
+	background-color: #33b;
 	border: 1px solid  #008;
 	font-size: 1em;
 	padding: 0.3rem;
@@ -27,7 +27,7 @@ button {
 
 label {
 	position: relative;
-	margin-left: 1em;
+	margin-left: 0.7em;
 	border:1px solid  #008;
 	padding: 0.3rem;
 	border-radius: 0.4rem;
@@ -37,8 +37,9 @@ label {
 
 select {
 	position: relative;
-	margin-left: 1em;
+	margin-left: 0.7em;
 	font-size: 1em;
+	height: 1.6em;
 }
 
 .emoticon-button {
@@ -66,8 +67,8 @@ select {
 	position: relative;
 	margin-left: 1em;
 	height: 1.8em;
-	color: black;
-	background-color: white;
+	color: white;
+	background-color: #11d;
 	border: 1px solid  #008;
 	font-size: 1em;
 	padding: 0.2rem;
@@ -134,45 +135,55 @@ select {
 
 .send-message-container {
 	position: absolute;
-	top: 6em;
-	width: 100%;
-	height: 6em;
+	top: calc(100% - 3em - 2em);
+	left: 16em;
+	width: calc(100% - 16em);
+	height: 3em;
 	background-color: #a0a0a0;
 }
 
 .group-management-container {
 	position: absolute;
-	top: 12em;
+	top: 6em;
+	width: 100%;
+	height: 9em;
+	background-color: #808080;
+}
+
+.new-conversation-container {
+	position: absolute;
+	top: 15em;
+	left: 0em;
 	width: 100%;
 	height: 3em;
-	background-color: #808080;
+	background-color: #444;
 }
 
 .conversations-container {
 	position: absolute;
-	top: 15em;
+	top: 18em;
 	width: 16em;
-	height: calc(100% - 15em);
+	height: calc(100% - 18em);
 	background-color: #c0c0c0;
 	overflow-y: auto;
 }
 
 .conversation-container {
 	position: absolute;
-	top: 15em;
+	top: 24em;
 	left: 16em;
 	width: calc(100% - 16em);
-	height: calc(100% - 18em);
+	height: calc(100% - 24em);
 	background-color: #e5ddd5;
 	overflow-y: auto;
 }
 
 .message-container {
 	position: absolute;
-	top: calc(100% - 3em);
+	top: 18em;
 	left: 16em;
 	width: calc(100% - 16em);
-	height: 3em;
+	height: 6em;
 	background-color: #a0a0a0;
 }
 
@@ -237,6 +248,7 @@ select {
 /*entrambi i riquadri*/
 .message-box p {
 	position:relative;
+	display: block;
 	right: 0em;
 	text-align: right;
 	max-width: 65%;

@@ -4,7 +4,7 @@ package database
 func (db *appdbimpl) GetMyConversations(from_user_id int) ([]Conversation, error) {
 	// Query data
 	rows, err := db.c.Query(`
-					SELECT CONVERSATIONS_USERS.conversation_id, user_name as user_or_group_name, ifnull(user_photo, '') as user_or_group_photo, 0 is_group,
+					SELECT CONVERSATIONS_USERS.conversation_id, USERS.user_id as user_or_group_id, user_name as user_or_group_name, ifnull(user_photo, '') as user_or_group_photo, 0 is_group,
 						ifnull(last_timestamp, '') as last_timestamp, ifnull(last_msg, '') as last_msg
 					FROM CONVERSATIONS_USERS
 					INNER JOIN USERS ON CONVERSATIONS_USERS.user_id=USERS.user_id
@@ -24,7 +24,7 @@ func (db *appdbimpl) GetMyConversations(from_user_id int) ([]Conversation, error
 						WHERE user_id = ? AND GROUPS.conversation_id IS NULL
 					) AND CONVERSATIONS_USERS.user_id <> ?
 					UNION ALL
-					SELECT GROUPS.conversation_id, group_name as user_or_group_name, ifnull(group_photo, '') as user_or_group_photo, 1 is_group,
+					SELECT GROUPS.conversation_id, GROUPS.group_id as user_or_group_id, group_name as user_or_group_name, ifnull(group_photo, '') as user_or_group_photo, 1 is_group,
 						ifnull(last_timestamp, '') as last_timestamp, ifnull(last_msg, '') as last_msg
 					FROM GROUPS
 					LEFT JOIN
@@ -67,8 +67,8 @@ func (db *appdbimpl) GetMyConversations(from_user_id int) ([]Conversation, error
 	var conversations []Conversation
 	for rows.Next() {
 		var conv Conversation
-		err := rows.Scan(&conv.Conversation_id, &conv.User_or_group_name, &conv.User_or_group_photo,
-			&conv.Is_group, &conv.Last_timestamp, &conv.Last_msg)
+		err := rows.Scan(&conv.Conversation_id, &conv.User_or_group_id, &conv.User_or_group_name,
+			&conv.User_or_group_photo, &conv.Is_group, &conv.Last_timestamp, &conv.Last_msg)
 		if err != nil {
 			return conversations, err
 		}

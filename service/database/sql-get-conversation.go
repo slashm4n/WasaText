@@ -5,10 +5,11 @@ import "fmt"
 // Retrieve the conversations
 func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 	// Query data
-	var sql = `SELECT MESSAGES.msg_id, ifnull(forwarded_from_msg_id, 0), conversation_id, MESSAGES.from_user_id,
+	var sql = `SELECT MESSAGES.msg_id, ifnull(forwarded_from_msg_id, 0), conversation_id, MESSAGES.from_user_id, U1.user_name from_user_name,
 				strftime("%H:%M", sent_timestamp) AS timestamp, msg, iif(substr(msg, 1, 11)='data:image/', true, false) AS is_photo,
 				ifnull(R1.reaction_user, "") AS reaction, ifnull(S1.msg_id, 0) != 0 AS seen
 				FROM MESSAGES
+				INNER JOIN USERS AS U1 ON U1.user_id = MESSAGES.from_user_id
 				LEFT JOIN
 					(
 						SELECT msg_id, from_user_id, group_concat(reaction || USERS.user_name) as reaction_user
@@ -39,7 +40,7 @@ func (db *appdbimpl) GetConversation(conversation_id int) ([]Message, error) {
 	for rows.Next() {
 		var msg Message
 		err := rows.Scan(&msg.Msg_id, &msg.Forwarded_from_msg_id, &msg.Conversation_id, &msg.From_user_id,
-			&msg.Sent_timestamp, &msg.Msg, &msg.Is_photo, &msg.Reaction, &msg.Seen)
+			&msg.From_user_name, &msg.Sent_timestamp, &msg.Msg, &msg.Is_photo, &msg.Reaction, &msg.Seen)
 		if err != nil {
 			return messages, err
 		}

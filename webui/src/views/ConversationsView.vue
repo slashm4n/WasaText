@@ -10,7 +10,7 @@ export default {
 		return {
 			errormsg: '',
 			conversations: null,
-			selected_conversation_id: 0,
+			selected_conversation: null,
 			need_reload: false
 		}
 	},
@@ -38,15 +38,15 @@ export default {
                 else
                     this.errormsg = "Error: " + e;
 			}
-			this.selected_conversation_id = 0;
+			this.selected_conversation = null;
 			this.errormsg = "";
 		},
 		async onConversationClick(conv) {
-			this.selected_conversation_id = conv.conversation_id;
-			this.$emit('selectedConversationChanged', this.selected_conversation_id);
+			this.selected_conversation = conv;
+			this.$emit('selectedConversationChanged', this.selected_conversation);
 		},
 		async onConversationFocusOut() {
-			this.selected_conversation_id = 0;
+			this.selected_conversation = null;
 		},
 		async onErrorDismissed() {
 			this.errormsg = '';
@@ -57,7 +57,7 @@ export default {
 			if (newValue == 0) {
 				this.errormsg = '',
 				this.conversations = [],
-				this.selected_conversation_id = 0
+				this.selected_conversation = null
 			}
 			else
 				this.doUpdateConversationsList();
@@ -72,7 +72,7 @@ export default {
         window.addEventListener('beforeunload', (e) => {
 			try {
          	    // localStorage.setItem('conversations',  JSON.stringify(this.conversations));
-	            localStorage.setItem('selected_conversation_id', JSON.stringify(this.selected_conversation_id));
+	            localStorage.setItem('selected_conversation.user_or_group_id', JSON.stringify(this.selected_conversation.user_or_group_id));
 			} catch {
 				this.$emit('reloginNeeded');
 			}
@@ -80,7 +80,7 @@ export default {
 
         try {
             // if (localStorage.getItem('conversations') != null) this.conversations = JSON.parse(localStorage.getItem('conversations'));
-            if (localStorage.getItem('selected_conversation_id') != null) this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'));
+            if (localStorage.getItem('selected_conversation.user_or_group_id') != null) this.selected_conversation.user_or_group_id = JSON.parse(localStorage.getItem('selected_conversation.user_or_group_id'));
         } catch {
 			this.$emit('reloginNeeded');
         }
@@ -94,7 +94,7 @@ export default {
 <template>
 	<div v-if="session_token != 0">
 		<div class="conversations-container" v-if="session_token != 0">
-			<div class="conv-box" v-for="(c, index) in conversations" :key="c.id" :tabindex="index" @click="onConversationClick(c)" @focusout = "onConversationFocusOut">
+			<div class="conv-box" v-for="(c, index) in conversations" :key="(c.is_group ? 'G' : 'U') + c.user_id_or_group_id" :value="c" :tabindex="index" @click="onConversationClick(c)" @focusout = "onConversationFocusOut">
 				<img v-if="c.user_or_group_photo != ''" class="photo-box" v-bind:src="c.user_or_group_photo">
 				<img v-if="c.user_or_group_photo == ''" class="photo-box" src="../assets/profile.png">
 				<span class="name-box">{{ c.user_or_group_name }}{{ c.is_group ? ' (G)' : '' }}</span>
