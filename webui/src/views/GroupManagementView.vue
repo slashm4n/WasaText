@@ -271,29 +271,37 @@ export default {
                 this.new_group_name = '';
                 this.errormsg = '';
             }
-		}
+		},
+        all_users(newValue, oldValue) {
+            this.user_for_new_group = null;
+            this.user_to_add = null;
+        },
+        my_groups(newValue, oldValue) {
+            this.group_to_growth = null;
+            this.group_to_set = null;
+        }
     },
     beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
             try {
-                localStorage.setItem('group_name_to_create',  JSON.stringify(this.group_name_to_create));
-                localStorage.setItem('user_for_new_group', JSON.stringify(this.user_for_new_group));
-                localStorage.setItem('user_to_add', JSON.stringify(this.user_to_add));
-                localStorage.setItem('group_to_growth', JSON.stringify(this.group_to_growth));
-                localStorage.setItem('group_to_set', JSON.stringify(this.group_to_set));
-                localStorage.setItem('new_group_name', JSON.stringify(this.new_group_name));
+                // sessionStorage.setItem('group_name_to_create',  JSON.stringify(this.group_name_to_create));
+                // sessionStorage.setItem('user_for_new_group', JSON.stringify(this.user_for_new_group));
+                // sessionStorage.setItem('user_to_add', JSON.stringify(this.user_to_add));
+                // sessionStorage.setItem('group_to_growth', JSON.stringify(this.group_to_growth));
+                // sessionStorage.setItem('group_to_set', JSON.stringify(this.group_to_set));
+                // sessionStorage.setItem('new_group_name', JSON.stringify(this.new_group_name));
             } catch {
 				this.$emit('reloginNeeded');
 			}
         });
 
         try {
-            if (localStorage.getItem('group_name_to_create') != null) this.group_name_to_create = JSON.parse(localStorage.getItem('group_name_to_create'));
-            if (localStorage.getItem('user_for_new_group') != null) this.user_for_new_group = JSON.parse(localStorage.getItem('user_for_new_group'));
-            if (localStorage.getItem('user_to_add') != null) this.user_to_add = JSON.parse(localStorage.getItem('user_to_add'));
-            if (localStorage.getItem('group_to_growth') != null) this.group_to_growth = JSON.parse(localStorage.getItem('group_to_growth'));
-            if (localStorage.getItem('group_to_set') != null) this.group_to_set = JSON.parse(localStorage.getItem('group_to_set'));
-            if (localStorage.getItem('new_group_name') != null) this.new_group_name = JSON.parse(localStorage.getItem('new_group_name'));
+            // if (sessionStorage.getItem('group_name_to_create') != null) this.group_name_to_create = JSON.parse(sessionStorage.getItem('group_name_to_create'));
+            // if (sessionStorage.getItem('user_for_new_group') != null) this.user_for_new_group = JSON.parse(sessionStorage.getItem('user_for_new_group'));
+            // if (sessionStorage.getItem('user_to_add') != null) this.user_to_add = JSON.parse(sessionStorage.getItem('user_to_add'));
+            // if (sessionStorage.getItem('group_to_growth') != null) this.group_to_growth = JSON.parse(sessionStorage.getItem('group_to_growth'));
+            // if (sessionStorage.getItem('group_to_set') != null) this.group_to_set = JSON.parse(sessionStorage.getItem('group_to_set'));
+            // if (sessionStorage.getItem('new_group_name') != null) this.new_group_name = JSON.parse(sessionStorage.getItem('new_group_name'));
         } catch {
         	this.$emit('reloginNeeded');
 		}
@@ -320,7 +328,7 @@ export default {
                     <option v-for="u in all_users" :key="u.group_id" :value="u">{{ u.user_name }}</option>
                 </select>
                 <button @click="doCreateGroup">Apply</button>
-                <br></br>
+                <br>
                 <p style="border-bottom: 1em;"></p>
                 <span class="label-flat">Add to group</span>
                 <select id="groupNameToGrowthSelect" style="position:relative; width: 9em;" v-model="group_to_growth" :selected="0">
@@ -332,10 +340,8 @@ export default {
                     <option v-for="u in all_users" :key="u.user_id" :value="u">{{ u.user_name }}</option>
                 </select>
                 <button @click="doAddToGroup">Apply</button>
-                
-                <br></br>
+                <br>
                 <p style="border-bottom: 1em;"></p>
-                
                 <span class="label-flat">For group</span>
                 <select id="groupNameToSetSelect" style="position:relative; width: 9.5em;" v-model="group_to_set" :selected="0">
                     <option style="color:gray" disabled="true" :key="0" :value="null">select group</option>

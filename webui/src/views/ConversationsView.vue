@@ -41,13 +41,24 @@ export default {
 			this.selected_conversation = null;
 			this.errormsg = "";
 		},
+
 		async onConversationClick(conv) {
 			this.selected_conversation = conv;
 			this.$emit('selectedConversationChanged', this.selected_conversation);
 		},
-		async onConversationFocusOut() {
-			this.selected_conversation = null;
+
+		async onConversationFocusOut(event) {
+			// event.stopPropagation();
+			// event.preventDefault();
+			// event.stopImmediatePropagation();
 		},
+
+		async onConversationBlur(event) {
+			// event.stopPropagation();
+			// event.preventDefault();
+			// event.stopImmediatePropagation();
+		},
+
 		async onErrorDismissed() {
 			this.errormsg = '';
 		}
@@ -71,16 +82,14 @@ export default {
 	beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
 			try {
-         	    // localStorage.setItem('conversations',  JSON.stringify(this.conversations));
-	            localStorage.setItem('selected_conversation.user_or_group_id', JSON.stringify(this.selected_conversation.user_or_group_id));
+         	    // sessionStorage.setItem('conversations',  JSON.stringify(this.conversations));    
 			} catch {
 				this.$emit('reloginNeeded');
 			}
         });
 
         try {
-            // if (localStorage.getItem('conversations') != null) this.conversations = JSON.parse(localStorage.getItem('conversations'));
-            if (localStorage.getItem('selected_conversation.user_or_group_id') != null) this.selected_conversation.user_or_group_id = JSON.parse(localStorage.getItem('selected_conversation.user_or_group_id'));
+            // if (sessionStorage.getItem('conversations') != null) this.conversations = JSON.parse(sessionStorage.getItem('conversations'));
         } catch {
 			this.$emit('reloginNeeded');
         }
@@ -94,7 +103,7 @@ export default {
 <template>
 	<div v-if="session_token != 0">
 		<div class="conversations-container" v-if="session_token != 0">
-			<div class="conv-box" v-for="(c, index) in conversations" :key="(c.is_group ? 'G' : 'U') + c.user_id_or_group_id" :value="c" :tabindex="index" @click="onConversationClick(c)" @focusout = "onConversationFocusOut">
+			<div class="conv-box" v-for="(c, index) in conversations" :key="(c.is_group ? 'G' : 'U') + c.user_id_or_group_id" :value="c" :tabindex="index" @click="onConversationClick(c)" @focusout="onConversationFocusOut" @blur="onConversationBlur">
 				<img v-if="c.user_or_group_photo != ''" class="photo-box" v-bind:src="c.user_or_group_photo">
 				<img v-if="c.user_or_group_photo == ''" class="photo-box" src="../assets/profile.png">
 				<span class="name-box">{{ c.user_or_group_name }}{{ c.is_group ? ' (G)' : '' }}</span>

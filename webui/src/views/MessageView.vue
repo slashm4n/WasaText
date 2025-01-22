@@ -237,22 +237,21 @@ export default {
 	beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
 			try {
-            	localStorage.setItem('user_or_group_for_send_msg',  JSON.stringify(this.user_or_group_for_send_msg));
-            	localStorage.setItem('user_or_group_for_forward_msg',  JSON.stringify(this.user_or_group_for_forward_msg));
+            	// sessionStorage.setItem('user_or_group_for_send_msg',  JSON.stringify(this.user_or_group_for_send_msg));
+            	// sessionStorage.setItem('user_or_group_for_forward_msg',  JSON.stringify(this.user_or_group_for_forward_msg));
 			} catch {
         		this.$emit('reloginNeeded');
 			}
         });
 
         try {
-            if (localStorage.getItem('user_or_group_for_send_msg') != null) this.user_or_group_for_send_msg = JSON.parse(localStorage.getItem('user_or_group_for_send_msg'));
-            if (localStorage.getItem('user_or_group_for_forward_msg') != null) this.user_or_group_for_forward_msg = JSON.parse(localStorage.getItem('user_or_group_for_forward_msg'));
+            // if (sessionStorage.getItem('user_or_group_for_send_msg') != null) this.user_or_group_for_send_msg = JSON.parse(sessionStorage.getItem('user_or_group_for_send_msg'));
+            // if (sessionStorage.getItem('user_or_group_for_forward_msg') != null) this.user_or_group_for_forward_msg = JSON.parse(sessionStorage.getItem('user_or_group_for_forward_msg'));
         } catch {
         	this.$emit('reloginNeeded');
 		}
     },
 	mounted: function() {
-		this.selected_message = null;
 		this.user_or_group_for_send_msg = null;
 		this.user_or_group_for_forward_msg = null;
 	}
@@ -269,28 +268,30 @@ export default {
                 <label for="photoSender" class="label-button">Send photo</label>
 				<input id="photoSender" ref="photoSender" type="file" accept="image/*" hidden="true" @click="onImageUploaderClick" @change="doSendPhoto">
 			</div>
-			<br></br>
-			<span v-if="selected_message != null && selected_message.from_user_id!=user.id" style="position: relative; top:0.5em">
+			<br>
+			<span v-if="selected_message != null && selected_message.from_user_id!=user.id" style="position: relative; top:0.4em">
 				<span>&nbsp;&nbsp;&nbsp;</span>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F600;">&#x1F600;</button>
 				<span>&nbsp;</span>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F602;">&#x1F602;</button>
+				<span>&nbsp;</span>
+				<button class="emoticon-button" @click="onReactionClick" value="&#x1F62F;">&#x1F62F;</button>
 				<span>&nbsp;</span>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F621;">&#x1F621;</button>
 				<span>&nbsp;</span>
 				<button class="emoticon-button" @click="onReactionClick" value="&#x1F44D;">&#x1F44D;</button>
 				<button @click="onDeleteReaction">Uncomment</button>
 			</span>
-			<span v-if="selected_message != null && selected_message.from_user_id==user.id" style="position: relative; top: 0.7em;">
+			<span v-if="selected_message != null && selected_message.from_user_id==user.id" style="position: relative; top: 0.4em;">
 				<button @click="onDeleteMessage">Delete msg</button>
 			</span>
-			<span v-if="selected_message != null" style="position: relative; top: 0.7em;">
+			<span v-if="selected_message != null" style="position: relative; top: 0.4em;">
 				<span class="label-flat">Forward to</span>
 				<select id="userOrGroupForForwardMsgSelect" style="position:relative; height: 1.3em; width: 11em;" v-model="user_or_group_for_forward_msg" :selected="0">
 					<option style="color:gray" disabled="true" :key="0" :value="null">select user or group</option>
 					<option v-for="u in all_users_and_my_groups" :key="(u.is_group ? 'G' : 'U') + u.user_id_or_group_id" :value="u">{{ u.is_group ? u.group_name + " (G)" : u.user_name }}</option>
 				</select>
-				<button @click="doForwardMessage">Apply</button>
+				<button @click="doForwardMessage">Send</button>
 			</span>
 		</div>
 		<ErrorMsg :errormsg="errormsg" @errorDismissed="onErrorDismissed"></ErrorMsg>

@@ -5,17 +5,17 @@ import GroupManagementView from './GroupManagementView.vue';
 import ConversationsView from './ConversationsView.vue';
 import ConversationView from './ConversationView.vue';
 import MessageView from './MessageView.vue'
-
 </script>
 
 <script>
-
 export default {
     data: function() {
 		return {
             errormsg: '',
             session_token: 0,
             username: '',
+            old_user_login: '',
+            new_user_login: '',
             new_name: '',
             user: null,
             all_users: null,
@@ -26,16 +26,20 @@ export default {
             selected_message : null,
             need_update_conversations_list : false,
             need_update_conversation : false,
-            // need_update_all_users_list : false,
             need_update_groups_list : false
 		}
 	},
 	methods: {
-        async doLogin() {
+        async doLogin(newUser) {
             try {
-                 if (this.username.length < 3 || this.username.length > 16) {
-                    this.errormsg = "user name too short or too long (min 3, max 16)";
-                    return;
+                if (newUser) {
+                    if (this.new_user_login.length < 3 || this.new_user_login.length > 16) {
+                        this.errormsg = "user name too short or too long (min 3, max 16)";
+                        return;
+                    }
+                    this.username = this.new_user_login;
+                } else {
+                    this.username = this.old_user_login;
                 }
 
                 const res = await this.$axios({
@@ -50,22 +54,15 @@ export default {
                 
                 if (authHeader && authHeader.startsWith('Bearer ')) {
                     this.session_token = authHeader.substring(7);
-                    // console.log("session token ", this.session_token);
                 } else {
                     this.errormsg = "no valid authorization header found.";
                 }
 
                 if (res.status == 200) {
                     console.log("Login done successfully. User already existing. Session token ", this.session_token);
-
-                    // also if the user exist, the all users list need to be updated soon after login
-                    // this.need_update_all_users_list = true;
                 }
                 else if (res.status == 201) {
                     console.log("Login done successfully. New user created. Session token ", this.session_token);
-
-                    // need refresh the all users list!
-                    // this.need_update_all_users_list = true;
                 }
                 else {
                     this.errormsg = "Response code" + res.statusText + " diverso da quello atteso";
@@ -88,7 +85,6 @@ export default {
 
                 // Soon after the login Update the users list and my groups list
                 this.doUpdateAllUsersAndMyGroupsList();
-                this.doUpdateMyGroupsList();
 
                 // Exit
                 this.errormsg = "";
@@ -104,6 +100,7 @@ export default {
             this.errormsg = '';
             this.session_token = 0;
             // this.username = ''; // we leave the username for ease
+            // new_user_login = '';
             this.new_name = '';
             this.user = null;
             this.all_users_and_my_groups = null;
@@ -112,8 +109,8 @@ export default {
             this.selected_message = null;
             this.need_update_conversations_list = false;
             this.need_update_conversation = false;
-            // this.need_update_all_users_list = false;
-            this.need_update_groups_list = false;
+
+            sessionStorage.clear();
         },
 
 		async doSetMyUserName(new_name) {
@@ -133,13 +130,12 @@ export default {
                     this.errormsg = "Problem updating the user name";
                     return;
                 }
+
                 this.username = this.new_name;
                 this.user.name = this.new_name;
                 this.new_name = '';
+                
                 this.errormsg = "";
-
-                // need refresh the all users list!
-                // this.need_update_all_users_list = true;
             } catch (e) {
                 if (e.response != null && e.response.data != "")
                     this.errormsg = "Error: " + e.response.data;
@@ -176,7 +172,7 @@ export default {
                     this.errormsg = "Error: " + e;
             }
         },
-		
+
         async doSetMyPhoto(e) {
             const img = e.target.files[0];
             if (img == null)
@@ -191,6 +187,10 @@ export default {
 
         async doUpdateAllUsersAndMyGroupsList() {
             try {
+                if (this.session_token == 0) {
+                    return;
+                }
+
                 // Get the list of all users
                 var res = await this.$axios({
                     method: 'get',
@@ -205,8 +205,11 @@ export default {
                     return;
                 }
 
-                // Remove myself!
+                // Retrieve my photo
                 const index = res.data.map(u => u.user_id).indexOf(this.user.id);
+                this.user.photo = res.data[index].user_photo;
+
+                // And remove myself from the lits!
                 res.data.splice(index, 1);
                 this.all_users_and_my_groups = res.data;
                 
@@ -231,6 +234,9 @@ export default {
                     this.errormsg = "Unexpected response " + res.status;
                     return;
                 }
+
+                // Store my groups
+                this.my_groups = res.data;
 
                 // Add the column 'is_group' with value true
                 if (res.data != null) {
@@ -261,51 +267,14 @@ export default {
                     this.errormsg = "Error: " + e;
             }
         },
-        
-        async doUpdateMyGroupsList() {
-            try {
-                // Get the list of groups that belongs to the user
-                const res = await this.$axios({
-                    method: 'get',
-                    url: '/groups',
-                    headers: {
-                        'Authorization' : 'Bearer ' + this.session_token
-                    }
-                });
-
-                if (res.status != 200) {
-                    this.errormsg = "Unexpected response " + res.status;
-                    return;
-                }
-
-                this.my_groups = res.data;
-
-            } catch (e) {
-                if (e.response != null && e.response.data != "")
-                    this.errormsg = "Error: " + e.response.data;
-                else
-                    this.errormsg = "Error: " + e;
-            }
-        },
-
-        
-
-
-        async onNeedUpdateAllUsersList() {
-            this.doUpdateAllUsersAndMyGroupsList();
-            this.need_update_conversations_list = true;
-        },
 
         async onNeedUpdateMyGroupsList() {
-            this.doUpdateMyGroupsList();
             this.need_update_conversations_list = true;
             this.doUpdateAllUsersAndMyGroupsList();
-            // this.need_update_all_users_list = true;
         },
 
         async onSelectedConversationChanged(selected_conversation) {
             this.selected_conversation = selected_conversation;
-            // must reset the selected message!
             this.selected_message = null;
         },
         
@@ -331,23 +300,12 @@ export default {
             this.need_update_conversation = true;
         },
 
-        async onAllUsersListUpdated() {
-            this.doUpdateAllUsersAndMyGroupsList();
-        },
-
         async onPhotoUploaderClick() {
             this.$refs.photoUploader.value = '';
         },
 
-        async onMyConversationsUpdated() {
-            this.need_update_conversations_list = true;
-        },
-
         async onReloginNeeded() {
-            // non funziona cambiare evento?
-            // window.addEventListener('load', (e) => {
-                // this.errormsg = "some values get lost during refresh, need to relogin";
-            // })
+            this.session_token = 0;
         },
 
         async onErrorDismissed() {
@@ -355,50 +313,39 @@ export default {
         }
     },
     beforeMount: function () {
-        // uncomment ONLY for testing a new installation!
-        /*
-        localStorage.removeItem('session_token');
-        localStorage.removeItem('username');
-        localStorage.removeItem('new_name');
-        localStorage.removeItem('user');
-        localStorage.removeItem('all_users_and_my_groups');
-        localStorage.removeItem('my_groups');
-        localStorage.removeItem('selected_conversation');
-        localStorage.removeItem('selected_message');
-        localStorage.removeItem('need_update_conversations_list');
-        localStorage.removeItem('need_update_conversation');
-        */
-
         // save the state
         window.addEventListener('beforeunload', (e) => {
-            localStorage.setItem('session_token',  JSON.stringify(this.session_token));
-            localStorage.setItem('username', JSON.stringify(this.username));
-            localStorage.setItem('new_name', JSON.stringify(this.new_name));
-            localStorage.setItem('user', JSON.stringify(this.user));
-            localStorage.setItem('all_users_and_my_groups', JSON.stringify(this.all_users_and_my_groups));
-            localStorage.setItem('my_groups', JSON.stringify(this.my_groups));
-            localStorage.setItem('selected_conversation_id', JSON.stringify(this.selected_conversation_id));
-            localStorage.setItem('selected_message', JSON.stringify(this.selected_message));
-            localStorage.setItem('need_update_conversations_list', JSON.stringify(this.need_update_conversations_list));
-            localStorage.setItem('need_update_conversation', JSON.stringify(this.need_update_conversation));
-            // localStorage.setItem('need_update_all_users_list', JSON.stringify(this.need_update_all_users_list));
+            try {
+                // store the session token between reload
+                sessionStorage.setItem('session_token',  JSON.stringify(this.session_token));
+                // sessionStorage.setItem('username', JSON.stringify(this.username));
+                // sessionStorage.setItem('new_name', JSON.stringify(this.new_name));
+
+                // The photo is not stored in memory, will be retrieved with a new request to backend
+                // the storage is not large and huge photo raise an out of memory error
+                this.user.photo = '';
+                sessionStorage.setItem('user', JSON.stringify(this.user));
+                // sessionStorage.setItem('selected_conversation_id', JSON.stringify(this.selected_conversation_id));
+            } catch {    
+                this.session_token = 0;
+            }
         });
 
         // retrieve the state
         try {
-            if (localStorage.getItem('session_token') != null) this.session_token = JSON.parse(localStorage.getItem('session_token'));
-            if (localStorage.getItem('username') != null) this.username = JSON.parse(localStorage.getItem('username'));
-            if (localStorage.getItem('new_name') != null) this.new_name = JSON.parse(localStorage.getItem('new_name'));
-            if (localStorage.getItem('user') != null) this.user = JSON.parse(localStorage.getItem('user'));
-            if (localStorage.getItem('all_users_and_my_groups') != null) this.all_users_and_my_groups = JSON.parse(localStorage.getItem('all_users_and_my_groups'));
-            if (localStorage.getItem('my_groups') != null) this.my_groups = JSON.parse(localStorage.getItem('my_groups'));
-            if (localStorage.getItem('selected_conversation_id') != null) this.selected_conversation_id = JSON.parse(localStorage.getItem('selected_conversation_id'));
-            if (localStorage.getItem('need_update_conversations_list') != null) this.need_update_conversations_list = JSON.parse(localStorage.getItem('need_update_conversations_list'));
-            if (localStorage.getItem('need_update_conversation') != null) this.need_update_conversation = JSON.parse(localStorage.getItem('need_update_conversation'));
-            // if (localStorage.getItem('need_update_all_users_list') != null) this.need_update_all_users_list = JSON.parse(localStorage.getItem('need_update_all_users_list'));
+            if (sessionStorage.getItem('session_token') != null) this.session_token = JSON.parse(sessionStorage.getItem('session_token'));
+            // if (sessionStorage.getItem('username') != null) this.username = JSON.parse(sessionStorage.getItem('username'));
+            // if (sessionStorage.getItem('new_name') != null) this.new_name = JSON.parse(sessionStorage.getItem('new_name'));
+            if (sessionStorage.getItem('user') != null) this.user = JSON.parse(sessionStorage.getItem('user'));
+            // if (sessionStorage.getItem('selected_conversation_id') != null) this.selected_conversation_id = JSON.parse(sessionStorage.getItem('selected_conversation_id'));
+
+            this.doUpdateAllUsersAndMyGroupsList();
         } catch {
-            this.session_token = 0
-        }
+            this.session_token = 0;
+        }        
+    },
+    mounted: function() {
+        this.old_user_login = null;
     }
 }
 </script>
@@ -406,8 +353,17 @@ export default {
 <template>
     <div class="login-container">
         <div style="position: relative; top: 0.7em; float: left;">
-            <input id="userNameInput" v-if="session_token == 0" v-model="username" type="text" placeholder="User name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <button v-if="session_token == 0" @click="doLogin">Login</button>
+            <span v-if="session_token == 0">
+                <!--span class="label-flat">Existing user</span>
+                <select id="userNameForLoginSelect" style="position:relative; width: 10em;" v-model="old_user_login" :selected="0">
+                    <option style="color:gray" disabled="true" :key="0" :value="null">select user</option>
+                    <option v-for="u in all_users" :key="u.group_id" :value="u">{{ u.user_name }}</option>
+                </select>
+                <button @click="doLogin(false)">Login</button>
+                <span style="display:inline-block; width: 2em;"></span-->
+                <input id="newUserNameInput" v-model="new_user_login" type="text" placeholder="User name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <button @click="doLogin(true)">Login</button>
+            </span>
             <img v-if="session_token != 0 && user != null && user.photo !=''" class="photo-box" style="top:-0.7em" v-bind:src="user.photo">
             <img v-if="session_token != 0 && user != null && user.photo ==''" class="photo-box" style="top:-0.7em" src="../assets/profile.png">
             <span v-if="session_token != 0 && user != null" style="position: relative; top:-1.8em">

@@ -71,12 +71,14 @@ export default {
 	beforeMount: function () {
         window.addEventListener('beforeunload', (e) => {
 			try {
+                sessionStorage.setItem('message',  JSON.stringify(this.message));
 			} catch {
         		this.$emit('reloginNeeded');
 			}
         });
 
         try {
+            if (sessionStorage.getItem('message') != null) this.message = JSON.parse(sessionStorage.getItem('message'));
         } catch {
         	this.$emit('reloginNeeded');
 		}
@@ -91,7 +93,7 @@ export default {
 		<div class="new-conversation-container" v-if="session_token != 0">
             <div style="position:relative; top: 0.7em; float: left;">
                 <span class="label-flat">New conversation with</span>
-                <select id="userToSendMsgSelect" style="position:relative; height: 1.3em; width: 10em;" v-model="user_to_send_msg" :selected="0">
+                <select id="userToSendMsgSelect" style="position:relative; width: 10em;" v-model="user_to_send_msg" :selected="0">
                     <option style="color:gray" disabled="true" :key="0" :value="null">select user</option>
                     <option v-for="u in all_users" :key="u.user_id" :value="u">{{ u.user_name }}</option>
                 </select>

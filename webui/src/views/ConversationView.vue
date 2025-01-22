@@ -10,7 +10,7 @@ export default {
 		return {
 			errormsg: '',
 			messages: [],
-			selected_message_id: 0
+			// selected_message_id: 0
 		}
 	},
 	methods: {
@@ -44,7 +44,7 @@ export default {
 			}
 		},
 		async onMessageClick(msg) {
-			this.selected_message_id = msg.msg_id;
+			// this.selected_message_id = msg.msg_id;
 			this.$emit('selectedMessageChanged', msg);
 		},
 		async onErrorDismissed() {
@@ -56,7 +56,7 @@ export default {
 			if (newValue == 0) {
 				this.errormsg = '';
 				this.messages = [];
-				this.selected_message_id = 0;
+				// this.selected_message_id = 0;
 			}
 		},
     	selected_conversation(newValue, oldValue) {
@@ -71,16 +71,16 @@ export default {
         window.addEventListener('beforeunload', (e) => {
 			try {
 				// non salva i messaggi perché sarebbe troppo pesante, occorre riaprire la conversazione
-            	// localStorage.setItem('messages',  JSON.stringify(this.messages));
-            	localStorage.setItem('selected_message_id', JSON.stringify(this.selected_message_id));
+            	// sessionStorage.setItem('messages',  JSON.stringify(this.messages));
+            	// sessionStorage.setItem('selected_message_id', JSON.stringify(this.selected_message_id));
 			} catch {
 				this.$emit('reloginNeeded');
 			}
         });
 
         try {
-            // if (localStorage.getItem('messages') != null) this.messages = JSON.parse(localStorage.getItem('messages'));
-            if (localStorage.getItem('selected_message_id') != null) this.selected_message_id = JSON.parse(localStorage.getItem('selected_message_id'));
+            // if (sessionStorage.getItem('messages') != null) this.messages = JSON.parse(sessionStorage.getItem('messages'));
+            // if (sessionStorage.getItem('selected_message_id') != null) this.selected_message_id = JSON.parse(sessionStorage.getItem('selected_message_id'));
         } catch {
 			this.$emit('reloginNeeded');
         }
@@ -98,6 +98,7 @@ export default {
 				v-for="(msg, index) in messages" :key="msg.id" :tabindex="index" @click="onMessageClick(msg)">
 				<p v-if=!msg.is_photo>
 					<span style="font-style: italic;">{{ msg.from_user_name }}</span>
+					<span style="font-style: italic;">{{ msg.forwarded_from_msg_id > 0 ? '(forwarded)' : '' }}</span>
 					<span>{{ msg.msg }}</span>
 					<span style="position:relative; font-size: smaller;">
 						<span v-if="msg.from_user_id==user.id">{{ msg.sent_timestamp }}&nbsp;{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span>
@@ -107,6 +108,7 @@ export default {
 				</p>
 				<p v-if=msg.is_photo>
 					<span style="font-style: italic;">{{ msg.from_user_name }}</span>
+					<span style="font-style: italic;">{{ msg.forwarded_from_msg_id > 0 ? '(forwarded)' : '' }}</span>
 					<img class="photo-box-big" v-bind:src=msg.msg>
 					<span style="position:relative; font-size: smaller;">
 						<span v-if="msg.from_user_id==user.id">{{ msg.sent_timestamp }}&nbsp;{{ msg.seen > 0 ? "&#x2713;&#x2713;" : "&#x2713;" }}</span>
